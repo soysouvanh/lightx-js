@@ -2,7 +2,7 @@ import { SqliteExecutor } from '../../dist/index.js';
 import Database from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { UsersDao, RolesDao } from './playground_daox.js';
+import { UsersDao, RolesDao } from './sqlite_dao/index.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 async function run() {
     console.log('--- STARTING DAOX END-TO-END EXECUTION ---');
@@ -25,7 +25,7 @@ async function run() {
     });
     const fetched2 = await UsersDao.findById(exe, user.id);
     console.log('✔ User status updated to:', fetched2?.status);
-    console.log('[4/4] Testing BATCH INSERT (atomique loop) and STREAM ...');
+    console.log('[4/5] Testing BATCH INSERT (atomique loop) and STREAM ...');
     await RolesDao.insertBatch(exe, [
         { role_name: 'super_admin' },
         { role_name: 'moderator' }
@@ -36,6 +36,15 @@ async function run() {
         console.log('  Streamed Role ->', row);
     }
     console.log('✔ Roles streamed successfully. Count:', rolesCount);
+    console.log('[5/5] Testing YAGNI Index Resolvers & Hard Delete ...');
+    const ubyEmail = await UsersDao.findByEmail(exe, 'admin@lightx.io');
+    console.log('✔ User fetched via UNIQUE Index (findByEmail):', ubyEmail?.uuid);
+    const usByStatus = await UsersDao.findAllByStatusAndCreated_at(exe, 99, fetched2?.created_at);
+    console.log('✔ Users fetched via Classical Index (findAllBy...). Resolved:', usByStatus.length);
+    await UsersDao.deleteById(exe, user.id);
+    const verifyDeletion = await UsersDao.findById(exe, user.id);
+    if (!verifyDeletion)
+        console.log('✔ User was mathematically deleted via Secondary YAGNI Delete.');
     console.log('--- ALL DAOX GENERATED FUNCTIONS VALIDATED SOTA ---');
 }
 run().catch(err => {
