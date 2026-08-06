@@ -1,0 +1,37 @@
+{
+  "name": "@soysouvanh/daox",
+  "version": "0.1.0",
+  "description": "",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.js"
+  },
+  "bin": {
+    "daox": "./bin/daox.js"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean -d dist && tsup src/cli/index.ts --format esm --clean -d bin --external postgres --external mysql2 --external better-sqlite3 --external mssql --external oracledb && mv bin/index.js bin/daox.js",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "jest tests/unit --passWithNoTests",
+    "test:integration": "npm run test:db:up && jest tests/integration --runInBand && npm run test:db:down",
+    "test:db:up": "docker-compose -f tests/integration/setup/docker-compose.yml up -d --wait",
+    "test:db:down": "docker-compose -f tests/integration/setup/docker-compose.yml down -v"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/mssql": "^12.3.0",
+    "@types/node": "^20.12.7",
+    "@types/oracledb": "^7.0.2",
+    "better-sqlite3": "^13.0.3",
+    "mssql": "^12.7.0",
+    "mysql2": "^3.23.2",
+    "oracledb": "^7.0.1",
+    "postgres": "^3.4.9",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5"
+  }
+}

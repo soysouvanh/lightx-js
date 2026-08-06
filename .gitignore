@@ -1,0 +1,31 @@
+# Node Dependencies
+node_modules/
+packages/*/node_modules/
+npm-debug.log*
+
+# Builds & Outputs
+dist/
+bin/
+packages/*/dist/
+packages/*/bin/
+
+# Daox Generated Artifacts & Test Databases
+packages/daox/src/dao/
+packages/daox/src/daox_split_test/
+packages/daox/tests/integration/postgres_dao/
+packages/daox/tests/integration/sqlite_dao/
+packages/daox/tests/integration/setup/playground.db
+packages/daox/tests/integration/setup/playground.db-wal
+packages/daox/tests/integration/setup/playground.db-shm
+
+# Repomix Files
+**/repomix.config.json
+**/repomix-instruction.md
+repomix-output.txt
+repomix-output.xml
+
+# IDE / System
+.vscode/
+.idea/
+*.swp
+.DS_Store

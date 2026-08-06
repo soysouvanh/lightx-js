@@ -1,0 +1,9 @@
+{
+  "name": "@soysouvanh/lightx",
+  "version": "0.1.0",
+  "main": "index.js",
+  "dependencies": {
+    "@soysouvanh/daox": "*",
+    "@soysouvanh/tmplx": "*"
+  }
+}

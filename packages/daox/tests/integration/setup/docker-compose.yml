@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
+    ports:
+      - "5455:5432"
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: db
+    ports:
+      - "3306:3306"
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: "Password123!"
+    ports:
+      - "1433:1433"
+
+  oracle:
+    image: gvenzl/oracle-free:slim
+    environment:
+      ORACLE_PASSWORD: password
+    ports:
+      - "1521:1521"
