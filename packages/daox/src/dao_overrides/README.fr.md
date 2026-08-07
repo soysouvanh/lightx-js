@@ -1,6 +1,6 @@
 # DAO Overrides (Surcharges de DAO)
 
-**Langues :** [English](./README.md) | [Français](./README.fr.md)
+**Langues :** [English](https://github.com/soysouvanh/lightx-js/blob/main/packages/daox/src/dao_overrides/README.md) | [Français](https://github.com/soysouvanh/lightx-js/blob/main/packages/daox/src/dao_overrides/README.fr.md)
 
 Bienvenue dans le répertoire des **DAO Overrides** de Daox.
 

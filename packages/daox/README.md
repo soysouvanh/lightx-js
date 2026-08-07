@@ -1,6 +1,6 @@
 # Daox
 
-**Languages:** [English](./README.md) | [Français](./README.fr.md)
+**Languages:** [English](https://github.com/soysouvanh/lightx-js/blob/main/packages/daox/README.md) | [Français](https://github.com/soysouvanh/lightx-js/blob/main/packages/daox/README.fr.md)
 
 **Daox** is a **“Bare-Metal” and Database-First** ORM for Node.js and TypeScript, designed from scratch to achieve absolute pure performance and strictly zero overhead.
 
