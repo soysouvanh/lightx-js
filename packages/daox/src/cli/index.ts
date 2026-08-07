@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { assertMemoryBounds } from '../introspection/guard.js';
 import { validateOutputDir } from './io_guard.js';
-import { buildTableInterfaces, buildCrudMethods, buildAdvancedMethods, mapSqlTypeToTs } from '../generator/index.js';
+import { buildTableInterfaces, buildCrudMethods, buildAdvancedMethods, mapSqlTypeToTs, buildDaoTests, weaveOverride } from '../generator/index.js';
 
 /**
  * =========================================================================
@@ -90,7 +90,7 @@ async function main(): Promise<void> {
     // Clean previously generated files (deterministic output)
     const files = fs.readdirSync(finalOutDir);
     for (const file of files) {
-      if (file.endsWith('.dao.ts') || file.endsWith('.dao.js') || file === 'index.ts' || file === 'index.js') {
+      if (file.endsWith('.dao.ts') || file.endsWith('.dao.js') || file.endsWith('.test.ts') || file === 'index.ts' || file === 'index.js') {
         fs.unlinkSync(path.join(finalOutDir, file));
       }
     }
@@ -113,8 +113,18 @@ async function main(): Promise<void> {
     tableContent += buildAdvancedMethods(dialect, t) + '\n';
     tableContent += '}\n';
     
+    
+    // Apply AOT Weaver for developer overrides
+    tableContent = weaveOverride(safeTable, entity, tableContent);
+    
     const tableFilePath = path.join(finalOutDir, safeTable + '.dao.ts');
     fs.writeFileSync(tableFilePath, tableContent);
+    
+    // Generate ISO Unit Test
+    const testContent = buildDaoTests(dialect, t);
+    const testFilePath = path.join(finalOutDir, safeTable + '.dao.test.ts');
+    fs.writeFileSync(testFilePath, testContent);
+    
     console.log('  -> Table "' + t.name + '" processed.');
     
     indexContent += "export * from './" + safeTable + ".dao.js';\n";

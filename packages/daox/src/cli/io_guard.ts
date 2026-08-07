@@ -66,15 +66,23 @@ export function validateOutputDir(reqPath: string, rootDir: string): string {
     return realOut;
   }
 
-  // If it doesn't exist yet, verify its parent is within the root boundary
-  const parentDir = path.dirname(finalOut);
-  if (!fs.existsSync(parentDir)) {
-    throw new Error('SECURITY: Output parent directory does not exist');
+  // If it doesn't exist, traverse up until an existing parent is found
+  let currentParent = path.dirname(finalOut);
+  const uncreatedSuffixes = [path.basename(finalOut)];
+  
+  while (!fs.existsSync(currentParent)) {
+    const nextParent = path.dirname(currentParent);
+    if (nextParent === currentParent) {
+      throw new Error('SECURITY: Output directory boundary breached (filesystem root reached).');
+    }
+    uncreatedSuffixes.unshift(path.basename(currentParent));
+    currentParent = nextParent;
   }
-  const realParent = fs.realpathSync(parentDir);
+
+  const realParent = fs.realpathSync(currentParent);
   if (!realParent.startsWith(root + path.sep) && realParent !== root) {
     throw new Error('SECURITY: Path Traversal Attempt');
   }
 
-  return path.join(realParent, path.basename(finalOut));
+  return path.join(realParent, ...uncreatedSuffixes);
 }

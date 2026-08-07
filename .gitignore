@@ -11,8 +11,7 @@ packages/*/dist/
 packages/*/bin/
 
 # Daox Generated Artifacts & Test Databases
-packages/daox/src/dao/
-packages/daox/src/daox_split_test/
+#packages/daox/src/dao/
 packages/daox/tests/integration/postgres_dao/
 packages/daox/tests/integration/sqlite_dao/
 packages/daox/tests/integration/setup/playground.db

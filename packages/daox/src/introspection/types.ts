@@ -27,7 +27,7 @@ export interface TableSchema {
   columns: ColumnSchema[];
   /** 
    * Strict registry of Primary Keys. Crucial for triggering YAGNI generation mechanics 
-   * (e.g. \`findById\`, \`updatePartialById\`, \`deleteById\`). 
+   * (e.g. `findById`, `updateById`, `deleteById`). 
    */
   primaryKeys: string[];
   /** Extracted native SQL Indexes for automated fast-path read generations. */

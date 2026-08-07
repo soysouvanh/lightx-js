@@ -127,8 +127,17 @@ export function buildCrudMethods(dialect: string, table: TableSchema): string {
     return rows[0] as ${entity}Row;
   }`;
 
+  // --- COUNT ---
+  const countMethod = `
+  static async count(exe: GenericExecutor): Promise<number> {
+    const sql = "SELECT COUNT(*) as c FROM ${escTable}";
+    const rows = await exe.query<{ c: string | number | bigint }>(sql, []);
+    return Number(rows[0] ? rows[0].c : 0);
+  }`;
+
   // --- FIND BY PK ---
   let findMethod = '';
+  let existsMethod = '';
   if (pkName) {
     const escPk = jsStringEscape(escapeIdentifier(dialect, pkName));
     const p1 = paramPlaceholder(dialect, 1);
@@ -137,6 +146,13 @@ export function buildCrudMethods(dialect: string, table: TableSchema): string {
     const sql = "SELECT * FROM ${escTable} WHERE ${escPk} = ${p1}${limitClause}";
     const rows = await exe.query<${entity}Row>(sql, [pk]);
     return rows.length > 0 ? rows[0] as ${entity}Row : null;
+  }`;
+
+    existsMethod = `
+  static async existsBy${PkTitle}(exe: GenericExecutor, pk: ${pkType}): Promise<boolean> {
+    const sql = "SELECT 1 AS e FROM ${escTable} WHERE ${escPk} = ${p1}${limitClause}";
+    const rows = await exe.query<{ e: number }>(sql, [pk]);
+    return rows.length > 0;
   }`;
   }
 
@@ -162,7 +178,7 @@ export function buildCrudMethods(dialect: string, table: TableSchema): string {
           : '"?"';
 
     updateMethod = `
-  static async updatePartialBy${PkTitle}(exe: GenericExecutor, pk: ${pkType}, patch: ${entity}Patch): Promise<void> {
+  static async updateBy${PkTitle}(exe: GenericExecutor, pk: ${pkType}, patch: ${entity}Patch): Promise<void> {
     const keys = Object.keys(patch) as Array<keyof typeof patch>;
     if (keys.length === 0) return;
     const sets = keys.map((k, i) => ${setExpr}).join(", ");
@@ -209,6 +225,13 @@ export function buildCrudMethods(dialect: string, table: TableSchema): string {
       return `${escC} = ${paramP}`;
     }).join(' AND ');
 
+    indexMethods += `
+  static async existsBy${colsTitle}(exe: GenericExecutor, ${colsParamsTs}): Promise<boolean> {
+    const sql = "SELECT 1 AS e FROM ${escTable} WHERE ${whereClause}${limitClause}";
+    const rows = await exe.query<{ e: number }>(sql, [${colsVals}]);
+    return rows.length > 0;
+  }\n`;
+
     if (idx.isUnique) {
       indexMethods += `
   static async findBy${colsTitle}(exe: GenericExecutor, ${colsParamsTs}): Promise<${entity}Row | null> {
@@ -222,9 +245,15 @@ export function buildCrudMethods(dialect: string, table: TableSchema): string {
     const sql = "SELECT * FROM ${escTable} WHERE ${whereClause}";
     const rows = await exe.query<${entity}Row>(sql, [${colsVals}]);
     return rows;
+  }
+
+  static async countBy${colsTitle}(exe: GenericExecutor, ${colsParamsTs}): Promise<number> {
+    const sql = "SELECT COUNT(*) as c FROM ${escTable} WHERE ${whereClause}";
+    const rows = await exe.query<{ c: string | number | bigint }>(sql, [${colsVals}]);
+    return Number(rows[0] ? rows[0].c : 0);
   }\n`;
     }
   }
 
-  return [insertMethod, findMethod, updateMethod, deleteMethod, indexMethods].filter(Boolean).join('\n');
+  return [insertMethod, countMethod, findMethod, existsMethod, updateMethod, deleteMethod, indexMethods].filter(Boolean).join('\n');
 }

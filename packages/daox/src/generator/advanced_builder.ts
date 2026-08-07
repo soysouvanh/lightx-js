@@ -108,6 +108,34 @@ export function buildAdvancedMethods(dialect: string, table: TableSchema): strin
     }
   }
 
+  // --- listByOffset ---
+  let listByOffsetMethod = '';
+  if (pkName) {
+    let offsetSql: string;
+
+    if (isMssql) {
+      offsetSql = jsStringEscape('SELECT * FROM ' + escapeIdentifier(dialect, table.name) + ' ORDER BY ' + escapeIdentifier(dialect, pkName) + ' ASC OFFSET ' + paramPlaceholder(dialect, 1) + ' ROWS FETCH NEXT ' + paramPlaceholder(dialect, 2) + ' ROWS ONLY');
+    } else if (isOracle) {
+      offsetSql = jsStringEscape('SELECT * FROM ' + escapeIdentifier(dialect, table.name) + ' ORDER BY ' + escapeIdentifier(dialect, pkName) + ' ASC OFFSET ' + paramPlaceholder(dialect, 1) + ' ROWS FETCH NEXT ' + paramPlaceholder(dialect, 2) + ' ROWS ONLY');
+    } else {
+      const p1 = paramPlaceholder(dialect, 1);
+      const p2 = paramPlaceholder(dialect, 2);
+      offsetSql = jsStringEscape('SELECT * FROM ' + escapeIdentifier(dialect, table.name) + ' ORDER BY ' + escapeIdentifier(dialect, pkName) + ' ASC LIMIT ' + p1 + ' OFFSET ' + p2);
+    }
+
+    if (isMssql || isOracle) {
+      listByOffsetMethod = `
+  static listByOffset(exe: GenericExecutor, offset: number, limit: number): Promise<${entity}Row[]> {
+    return exe.query<${entity}Row>("${offsetSql}", [offset, limit]);
+  }`;
+    } else {
+      listByOffsetMethod = `
+  static listByOffset(exe: GenericExecutor, offset: number, limit: number): Promise<${entity}Row[]> {
+    return exe.query<${entity}Row>("${offsetSql}", [limit, offset]);
+  }`;
+    }
+  }
+
   // --- insertBatch with MAX_PARAMS chunking (Tache 3.4) ---
   const maxParams = MAX_PARAMS[dialect] ?? 65535;
 
@@ -164,5 +192,5 @@ export function buildAdvancedMethods(dialect: string, table: TableSchema): strin
     }
   }`;
 
-  return [listByCursorMethod, insertBatchMethod].filter(Boolean).join('\n');
+  return [listByCursorMethod, listByOffsetMethod, insertBatchMethod].filter(Boolean).join('\n');
 }

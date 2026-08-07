@@ -110,7 +110,7 @@ async function securedTransaction() {
 
 The Daox engine strictly applies the **YAGNI** (You Aren't Gonna Need It) concept. The injected DAO interface depends meticulously on the topology of your SQL table in the actual database.
 
-### 🔹 Global methods (Always generated)
+### Global methods (Always generated)
 
 These methods exist for all tables (and insertable Views), regardless of their internal structure.
 
@@ -136,11 +136,19 @@ await UsersDao.insertBatch(exe, [
 ]);
 ```
 
-### 🔹 YAGNI methods (Generated via Primary Key)
+#### 3. `count(exe)`
+
+Retrieves the exact total number of rows currently in the table. Returns an integer scalar.
+
+```typescript
+const totalUsers = await UsersDao.count(exe);
+```
+
+### YAGNI methods (Generated via Primary Key)
 
 If (and only if) the table has a **unique Primary Key** (e.g. `id`), the generator extends the DAO with these methods.
 
-#### 3. `findBy[Pk](exe, pk)`
+#### 4. `findBy[Pk](exe, pk)`
 
 Surgically retrieves a record by its absolute key. Returns the entity or `null`.
 
@@ -148,15 +156,23 @@ Surgically retrieves a record by its absolute key. Returns the entity or `null`.
 const user = await UsersDao.findById(exe, 42);
 ```
 
-#### 4. `updatePartialBy[Pk](exe, pk, patch)`
+#### 5. `existsBy[Pk](exe, pk)`
+
+Performs a lightweight boolean check to see if a record exists by its Primary Key, without fetching any payload data.
+
+```typescript
+const exists = await UsersDao.existsById(exe, 42);
+```
+
+#### 6. `updateBy[Pk](exe, pk, patch)`
 
 Dynamically updates the target record. It constructs a strict `UPDATE ... SET` query limiting network traffic exclusively to the explicitly provided payload.
 
 ```typescript
-await UsersDao.updatePartialById(exe, 42, { status: "deleted" });
+await UsersDao.updateById(exe, 42, { status: "deleted" });
 ```
 
-#### 5. `deleteBy[Pk](exe, pk)`
+#### 7. `deleteBy[Pk](exe, pk)`
 
 Radically deletes the targeted row via its absolute Primary Key.
 
@@ -164,7 +180,7 @@ Radically deletes the targeted row via its absolute Primary Key.
 await UsersDao.deleteById(exe, 42);
 ```
 
-#### 6. `listByCursor(exe, lastCursor, limit)`
+#### 8. `listByCursor(exe, lastCursor, limit)`
 
 Deploys the `AsyncIterable` iterator targeting the primary key to stream the table millions of times with zero live memory footprint (RAM) ($O(1)$) via a `WHERE pk > cursor ORDER BY pk ASC` scroll.
 
@@ -174,11 +190,28 @@ for await (const row of UsersDao.listByCursor(exe, null, 1000)) {
 }
 ```
 
-### 🔹 Topological YAGNI methods (Generated via Indexes)
+#### 9. `listByOffset(exe, offset, limit)`
+
+Retrieves records using traditional skip clauses (Offset Pagination). Useful for specific UI use-cases requiring arbitrary page jumps over a smaller dataset.
+
+```typescript
+const page = await UsersDao.listByOffset(exe, 0, 50);
+```
+
+### Topological YAGNI methods (Generated via Indexes)
 
 Daox introspects your SQL indexes (native and foreign keys). The API interface mathematically aligns with the pre-existing read highways in your database.
 
-#### 7. `findBy[Cols](exe, col1, col2)` (Unique Index)
+#### 10. `existsBy[Cols](exe, col1, col2)` (All Indexes)
+
+**(For ALL indexes).** Performs an ultra-fast existence check via an index, returning a boolean without reading the row.
+
+```typescript
+// Generated because an index (unique or not) exists on your table
+const exists = await UsersDao.existsByEmailAndTenant(exe, "admin@x.com", 1);
+```
+
+#### 11. `findBy[Cols](exe, col1, col2)` (Unique Index)
 
 **(If the DB Index is UNIQUE).** Executes a filter returning at most **one** single deterministic row.
 
@@ -187,13 +220,44 @@ Daox introspects your SQL indexes (native and foreign keys). The API interface m
 const account = await UsersDao.findByEmailAndTenant(exe, "admin@x.com", 1);
 ```
 
-#### 8. `findAllBy[Cols](exe, col1, col2)` (Classic / Multiple Index)
+#### 12. `findAllBy[Cols](exe, col1, col2)` (Classic / Multiple Index)
 
 **(If the Index is NOT UNIQUE).** Executes an optimized extraction returning an **array** of entities (e.g. a simple index or a FK).
 
 ```typescript
 // Generated because a simple Index (status, role) was placed on this table
 const admins = await UsersDao.findAllByStatusAndRole(exe, "active", "admin");
+```
+
+#### 13. `countBy[Cols](exe, col1, col2)` (Classic / Multiple Index)
+
+**(If the Index is NOT UNIQUE).** Rapidly counts the number of records matching the index criteria.
+
+```typescript
+const activeAdminsCount = await UsersDao.countByStatusAndRole(
+  exe,
+  "active",
+  "admin",
+);
+```
+
+### Iso-Generated Unit Tests
+
+During the codebase compilation, Daox strictly generates an isometric Unit Test file matching the exact structure of your DAO classes. It provides decoupled Jest test environments out-of-the-box that assert the strict invocation logic of your `GenericExecutor`, fully isolating your database logic without any manual test writing.
+
+**Location of generated tests:**
+The tests are systematically generated directly alongside your DAO files in your specified output directory (default: `./src/dao/`).
+For a table named `users`, you will find `./src/dao/users.dao.test.ts` paired with `./src/dao/users.dao.ts`.
+
+**How to run them:**
+Because they are fully typed and decoupled, they can be executed seamlessly using popular test runners like Jest or Vitest without any complex database or mock configuration.
+
+```bash
+# Run all auto-generated DAO tests using Jest
+npx jest src/dao/
+
+# Or run them with Vitest if you prefer
+npx vitest run src/dao/
 ```
 
 ---
@@ -235,6 +299,13 @@ await sql.begin(async (txSql) => {
 ### The built-in YAGNI concept
 
 (_You Aren't Gonna Need It_). Daox strictly generates the essentials. For instance: if a View (`VIEW`) in your DB does not materialize a primary key, Daox will only compile reading and streaming read functions (`listByCursor`), flatly refusing to create `updateById` methods or arbitrary deletions. The mathematical rigidity of the system takes absolute precedence.
+
+### DAO Overrides (Custom business logic)
+
+While Daox generates all your DAOs, many use-cases require injecting complex business queries (e.g. INNER JOIN, aggregations) or overriding a specific generated method to mandate a behavior.
+The `src/dao_overrides/` directory was created specifically for this purpose. It allows you to create "mirror" classes that will seamlessly replace or extend default generated methods during the _AOT Build_, without losing the compiler's structural integrity.
+
+**[View the explanatory documentation and ready-to-use examples for Overrides](./src/dao_overrides/README.md)**
 
 ---
 

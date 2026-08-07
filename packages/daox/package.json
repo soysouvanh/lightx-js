@@ -10,7 +10,7 @@
     "daox": "./bin/daox.js"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean -d dist && tsup src/cli/index.ts --format esm --clean -d bin --external postgres --external mysql2 --external better-sqlite3 --external mssql --external oracledb && mv bin/index.js bin/daox.js",
+    "build": "tsup src/index.ts --format esm --dts --minify --clean -d dist && tsup src/cli/index.ts --format esm --minify --clean -d bin --external typescript --external postgres --external mysql2 --external better-sqlite3 --external mssql --external oracledb && mv bin/index.js bin/daox.js",
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "jest tests/unit --passWithNoTests",
     "test:integration": "npm run test:db:up && jest tests/integration --runInBand && npm run test:db:down",
@@ -23,6 +23,7 @@
   "type": "module",
   "devDependencies": {
     "@types/better-sqlite3": "^9.6.0",
+    "@types/jest": "^30.0.0",
     "@types/mssql": "^12.3.0",
     "@types/node": "^20.12.7",
     "@types/oracledb": "^7.0.2",
