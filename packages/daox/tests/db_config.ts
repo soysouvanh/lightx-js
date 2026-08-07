@@ -18,7 +18,7 @@ export const DB_CONFIG = {
     mysql: 'mysql://phpmyadmin:@Test123@localhost/lightx_test',
     
     // MySQL Docker Database
-    mysqlDocker: 'mysql://root:password@127.0.0.1:3306/db',
+    mysqlDocker: 'mysql://root:password@127.0.0.1:34567/db',
     
     // SQL Server Integration Database (via Docker)
     sqlserver: 'sqlserver://sa:Password123!@127.0.0.1:1433',

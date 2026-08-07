@@ -20,3 +20,14 @@ export function assertMemoryBounds(schema: DatabaseSchema): void {
     }
   }
 }
+
+/**
+ * Validates table names to prevent introspection of internal/system schemas.
+ * 
+ * @param tableName - The name of the table to check.
+ * @returns true if the table is a system table, false otherwise.
+ */
+export function hasSystemGuards(tableName: string): boolean {
+  const norm = tableName.toLowerCase();
+  return norm.startsWith('sqlite_') || norm === 'information_schema' || norm === 'pg_catalog' || norm === 'pg_toast';
+}

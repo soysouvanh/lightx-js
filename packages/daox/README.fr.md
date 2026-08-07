@@ -30,6 +30,29 @@ Le code généré par Daox **ne contient aucune chaîne de connexion ni aucun é
 
 ---
 
+## Espace de tests (développement)
+
+Si vous souhaitez contribuer ou valider manuellement le framework, voici les commandes essentielles pour lancer les tests Daox intégrés :
+
+```bash
+# Dépendances requises
+npm install
+
+# 1. Tests unitaires (rapides, valident l'AOT & la sécurité)
+npm run test:unit
+
+# 2. Tests DAO iso-générés (valident le code généré via mock)
+# Lors de la compilation, Daox génère des tests Jest isolés dans `./tests/dao/`.
+npm run test:dao
+
+# 3. Tests d'intégration BDD (via Docker Compose)
+npm run test:db:up
+npm run test:integration
+npm run test:db:down
+```
+
+---
+
 ## Guide de démarrage
 
 ### 1. Générez vos DAOs (data access objects)
@@ -243,27 +266,6 @@ const activeAdminsCount = await UsersDao.countByStatusAndRole(
 );
 ```
 
-### Tests Unitaires Iso-Générés
-
-Lors de la compilation de la codebase, Daox génère strictement un fichier de Test Unitaire isométrique correspondant à la structure exacte de vos classes DAO. Il fournit des environnements de test Jest découplés "out-of-the-box" qui vérifient la logique d'invocation stricte de votre `GenericExecutor`, isolant totalement votre logique de base de données sans aucune écriture manuelle de tests.
-
-**Emplacement des tests générés :**
-Les tests sont systématiquement générés directement à côté de vos fichiers DAO (dans le dossier de sortie par défaut : `./src/dao/`).
-Par exemple, pour une table nommée `users`, vous trouverez `./src/dao/users.dao.test.ts` généré à côté de `./src/dao/users.dao.ts`.
-
-**Comment les exécuter :**
-Puisqu'ils sont strictement typés et découplés, les tests peuvent être exécutés directement via les runners les plus populaires du marché, sans configuration compliquée et sans avoir besoin d'accès BDD :
-
-```bash
-# Lancer tous les tests DAO générés via Jest
-npx jest src/dao/
-
-# Ou les lancer avec Vitest si vous le préférez
-npx vitest run src/dao/
-```
-
----
-
 ## Moteurs et compatibilité des drivers natifs
 
 Daox agit comme le chef d'orchestre des drivers C/C++ les plus véloces de Node.js. Pensez à installer le _Driver_ natif désiré (peer-dependency) en fonction du moteur :
@@ -310,37 +312,6 @@ Le dossier `src/dao_overrides/` a été créé spécifiquement pour cela. Il vou
 **[Voir la documentation explicative et les exemples prêts à l'emploi des Overrides](./src/dao_overrides/README.fr.md)**
 
 ---
-
-## Espace de Tests (Unitaires et Intégration)
-
-Pour garantir sa rigueur paramétrique "Zero-Fail", Daox inclut une batterie de tests complète.
-
-### 1. Tests Unitaires (AOT & Sécurité)
-
-Les tests unitaires vérifient les scanners SQL, la sécurité Anti-SSRF, les protections de Path Traversal, OOM, et les générateurs SOTA.
-
-```bash
-npm run test:unit
-```
-
-### 2. Tests d'Intégration BDD (Multi-Dialectes)
-
-Les tests d'intégration valident la compilation Daox complète directement contre de réelles bases de données isolées (via Docker Compose).
-
-Assurez-vous qu'une instance Docker est disponible, puis :
-
-```bash
-# Lance l'infrastructure Docker (MySQL, Postgres, SQL Server, Oracle)
-npm run test:db:up
-
-# Exécute tous les tests d'intégration Bare-Metal sur les 5 drivers
-npm run test:integration
-
-# Coupe et nettoie l'infrastructure Docker
-npm run test:db:down
-```
-
-_(Toutes les connexions aux instances de test, incluant la DB SQLite volatile, sont centralisées architecturalement dans le fichier interne `tests/db_config.ts`)._
 
 ---
 

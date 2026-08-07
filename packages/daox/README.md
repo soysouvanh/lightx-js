@@ -30,6 +30,29 @@ Daox-generated code **contains no connection strings or underlying global state*
 
 ---
 
+## Testing environment (development)
+
+If you wish to contribute or manually validate the framework, here are the essential commands to run the integrated Daox tests:
+
+```bash
+# Required dependencies
+npm install
+
+# 1. Unit tests (fast, validates AOT & security)
+npm run test:unit
+
+# 2. Iso-generated DAO tests (validates generated code via mock)
+# During compilation, Daox generates isolated Jest tests in `./tests/dao/`.
+npm run test:dao
+
+# 3. DB integration tests (via Docker Compose)
+npm run test:db:up
+npm run test:integration
+npm run test:db:down
+```
+
+---
+
 ## Getting started
 
 ### 1. Generate your DAOs (data access objects)
@@ -243,27 +266,6 @@ const activeAdminsCount = await UsersDao.countByStatusAndRole(
 );
 ```
 
-### Iso-Generated Unit Tests
-
-During the codebase compilation, Daox strictly generates an isometric Unit Test file matching the exact structure of your DAO classes. It provides decoupled Jest test environments out-of-the-box that assert the strict invocation logic of your `GenericExecutor`, fully isolating your database logic without any manual test writing.
-
-**Location of generated tests:**
-The tests are systematically generated directly alongside your DAO files in your specified output directory (default: `./src/dao/`).
-For a table named `users`, you will find `./src/dao/users.dao.test.ts` paired with `./src/dao/users.dao.ts`.
-
-**How to run them:**
-Because they are fully typed and decoupled, they can be executed seamlessly using popular test runners like Jest or Vitest without any complex database or mock configuration.
-
-```bash
-# Run all auto-generated DAO tests using Jest
-npx jest src/dao/
-
-# Or run them with Vitest if you prefer
-npx vitest run src/dao/
-```
-
----
-
 ## Engines and native driver compatibility
 
 Daox acts as the orchestrator for the fastest C/C++ Node.js drivers. Be sure to install the desired native _Driver_ (peer-dependency) based on the engine:
@@ -310,37 +312,6 @@ The `src/dao_overrides/` directory was created specifically for this purpose. It
 **[View the explanatory documentation and ready-to-use examples for Overrides](./src/dao_overrides/README.md)**
 
 ---
-
-## Testing Environment (Unit & Integration)
-
-To guarantee its "Zero-Fail" parametric rigor, Daox includes a comprehensive test suite.
-
-### 1. Unit Tests (AOT & Security)
-
-Unit tests verify the SQL scanners, Anti-SSRF security, Path Traversal protections, OOM safeguards, and the SOTA generators.
-
-```bash
-npm run test:unit
-```
-
-### 2. DB Integration Tests (Multi-Dialect)
-
-Integration tests validate the entire Daox compilation directly against real, isolated databases (via Docker Compose).
-
-Ensure that a Docker daemon context is available, then:
-
-```bash
-# Boot up the Docker infrastructure (MySQL, Postgres, SQL Server, Oracle)
-npm run test:db:up
-
-# Execute all Bare-Metal integration tests across the 5 drivers
-npm run test:integration
-
-# Wipe and teardown the Docker infrastructure
-npm run test:db:down
-```
-
-_(All connections to the test instances, including the volatile SQLite DB, are architecturally centralized in the internal `tests/db_config.ts` file)._
 
 ---
 

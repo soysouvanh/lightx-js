@@ -1,7 +1,7 @@
 {
   "name": "@soysouvanh/daox",
-  "version": "1.0.3",
-  "description": "**Daox** is a **“Bare-Metal” and Database-First** ORM for Node.js and TypeScript, designed from scratch to achieve absolute pure performance and strictly zero overhead.",
+  "version": "1.0.4",
+  "description": "Daox is a “Bare-Metal” and Database-First ORM for Node.js and TypeScript, designed from scratch to achieve absolute pure performance and strictly zero overhead.",
   "keywords": [],
   "license": "ISC",
   "author": "",
@@ -21,25 +21,29 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --minify --clean -d dist && tsup src/cli/index.ts --format esm --minify --clean -d bin --external typescript --external postgres --external mysql2 --external better-sqlite3 --external mssql --external oracledb && mv bin/index.js bin/daox.js",
     "test": "npm run test:unit && npm run test:integration",
-    "test:unit": "jest tests/unit --passWithNoTests",
-    "test:integration": "npm run test:db:up && jest tests/integration --runInBand && npm run test:db:down",
+    "test:unit": "NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/unit --passWithNoTests --verbose",
+    "test:dao": "NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/dao --passWithNoTests --verbose",
+    "test:integration": "npm run test:db:up && NODE_OPTIONS=\"--experimental-vm-modules\" jest tests/integration --runInBand --verbose && npm run test:db:down",
     "test:db:up": "docker compose -f tests/integration/setup/docker-compose.yml up -d --wait",
     "test:db:down": "docker compose -f tests/integration/setup/docker-compose.yml down -v"
   },
   "dependencies": {
-    "undici-types": "^6.21.0"
+    "undici-types": "^8.10.0"
   },
   "devDependencies": {
+    "@jest/globals": "^30.4.1",
     "@types/better-sqlite3": "^9.6.0",
     "@types/jest": "^30.0.0",
     "@types/mssql": "^12.3.0",
     "@types/node": "^20.12.7",
     "@types/oracledb": "^7.0.2",
     "better-sqlite3": "^13.0.3",
+    "jest": "^30.4.2",
     "mssql": "^12.7.0",
     "mysql2": "^3.23.2",
     "oracledb": "^7.0.1",
     "postgres": "^3.4.9",
+    "ts-jest": "^29.4.12",
     "tsup": "^8.0.2",
     "typescript": "^5.4.5"
   }
