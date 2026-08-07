@@ -1,5 +1,7 @@
 # Daox
 
+**Languages:** [English](./README.md) | [Français](./README.fr.md)
+
 **Daox** is a **“Bare-Metal” and Database-First** ORM for Node.js and TypeScript, designed from scratch to achieve absolute pure performance and strictly zero overhead.
 
 Unlike traditional ORMs that rely on heavy runtime reflection and complex object mapping (Classes, Decorators, Proxies), Daox operates differently. It introspects your existing database **Ahead of Time (AOT)** and generates pure, frozen, optimized, and statically bound TypeScript code.

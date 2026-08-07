@@ -1,5 +1,7 @@
 # DAO Overrides (Surcharges de DAO)
 
+**Langues :** [English](./README.md) | [Français](./README.fr.md)
+
 Bienvenue dans le répertoire des **DAO Overrides** de Daox.
 
 L'architecture de Daox repose sur un principe **"Database-First"** (la base de données fait foi) couplé à une génération de code **AOT (Ahead-Of-Time)** ultra-rapide et performante. Par défaut, Daox génère automatiquement l'ensemble de vos DAO à partir de votre schéma de base de données.

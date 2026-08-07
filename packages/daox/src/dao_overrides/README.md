@@ -1,5 +1,7 @@
 # DAO Overrides
 
+**Languages:** [English](./README.md) | [Français](./README.fr.md)
+
 Welcome to the **DAO Overrides** directory for Daox.
 
 Daox's architecture is built strictly on a **"Database-First"** principle, paired with an ultra-fast **AOT (Ahead-Of-Time)** code generation engine. By default, Daox automatically generates all your Data Access Objects (DAOs) directly from your database schema.
