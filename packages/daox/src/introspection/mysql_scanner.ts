@@ -22,7 +22,20 @@ interface MysqlIndex extends mysql.RowDataPacket {
   NON_UNIQUE: number;
 }
 
+/**
+ * Anti-SSRF protocol validation (Tache 5.4).
+ * Only `mysql:` protocol is authorized.
+ */
+function validateMysqlUrl(url: string): void {
+  const parsed = new URL(url);
+  if (parsed.protocol !== 'mysql:') {
+    throw new Error('SECURITY: Invalid database protocol');
+  }
+}
+
 export async function scanMysql(url: string): Promise<DatabaseSchema> {
+  validateMysqlUrl(url);
+
   const conn = await mysql.createConnection(url);
   
   const [tables] = await conn.query<MysqlTable[]>(`
@@ -96,7 +109,8 @@ export async function scanMysql(url: string): Promise<DatabaseSchema> {
             isUnique: ix.NON_UNIQUE === 0
           });
         }
-        idxMap.get(idxName)!.columns.push(ix.COLUMN_NAME);
+        const entry = idxMap.get(idxName);
+        if (entry) entry.columns.push(ix.COLUMN_NAME);
       }
     }
     table.indexes = Array.from(idxMap.values());

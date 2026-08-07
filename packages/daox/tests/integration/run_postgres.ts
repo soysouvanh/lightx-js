@@ -2,10 +2,12 @@ import { PostgresExecutor } from '../../dist/index.js';
 import postgres from 'postgres';
 import { UsersDao, ConfigurationsDao, Product_metadataDao } from './postgres_dao/index.js';
 
+import { DB_CONFIG } from '../db_config.js';
+
 async function run() {
     console.log('--- STARTING DAOX POSTGRES COMPLEX E2E EXECUTION ---');
     
-    const sql = postgres('postgres://root:password@127.0.0.1:5455/db');
+    const sql = postgres(DB_CONFIG.postgres);
     const exe = new PostgresExecutor(sql);
     
     console.log('[1/7] Testing INSERT (Omit default values) ...');
@@ -15,7 +17,7 @@ async function run() {
         last_name: 'Stark', 
         status: 'guest' 
     });
-    console.log('✔ Inserted generated ID:', newUser.id);
+    console.log('✔ Inserted generated ID:', newUser.id!);
     
     console.log('[2/7] Testing BATCH INSERT (Bulk network payload) ...');
     await UsersDao.insertBatch(exe, [
@@ -25,7 +27,7 @@ async function run() {
     console.log('✔ Checked mass insertion mapping success.');
     
     console.log('[3/7] Testing FIND (findByPk) on Seeded Data ...');
-    const user = await UsersDao.findById(exe, 1);
+    const user = await UsersDao.findById(exe, 1n);
     console.log('✔ User 1 fetched safely:', user?.email, user?.status);
     
     console.log('[2/3] Testing reserved keywords and UPDATE ...');

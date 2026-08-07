@@ -4,6 +4,7 @@ packages/*/node_modules/
 npm-debug.log*
 
 # Builds & Outputs
+docs/
 dist/
 bin/
 packages/*/dist/

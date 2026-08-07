@@ -23,7 +23,23 @@ interface MsSqlIndex {
   column_name: string;
 }
 
+/**
+ * Anti-SSRF protocol validation (Tache 5.4).
+ * Only `mssql:` and `sqlserver:` protocols are authorized.
+ */
+function validateMssqlUrl(url: string): void {
+  // mssql connection strings may use various formats; validate URL-style inputs
+  if (url.includes('://')) {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'mssql:' && parsed.protocol !== 'sqlserver:') {
+      throw new Error('SECURITY: Invalid database protocol');
+    }
+  }
+}
+
 export async function scanSqlServer(url: string): Promise<DatabaseSchema> {
+  validateMssqlUrl(url);
+
   const pool = await mssql.connect(url);
   
   const tables = await pool.request().query<MsSqlTable>(`
@@ -99,7 +115,8 @@ export async function scanSqlServer(url: string): Promise<DatabaseSchema> {
             isUnique: ix.is_unique
           });
         }
-        idxMap.get(ix.name)!.columns.push(ix.column_name);
+        const entry = idxMap.get(ix.name);
+        if (entry) entry.columns.push(ix.column_name);
       }
     }
     table.indexes = Array.from(idxMap.values());

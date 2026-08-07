@@ -14,8 +14,8 @@
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "jest tests/unit --passWithNoTests",
     "test:integration": "npm run test:db:up && jest tests/integration --runInBand && npm run test:db:down",
-    "test:db:up": "docker-compose -f tests/integration/setup/docker-compose.yml up -d --wait",
-    "test:db:down": "docker-compose -f tests/integration/setup/docker-compose.yml down -v"
+    "test:db:up": "docker compose -f tests/integration/setup/docker-compose.yml up -d --wait",
+    "test:db:down": "docker compose -f tests/integration/setup/docker-compose.yml down -v"
   },
   "keywords": [],
   "author": "",

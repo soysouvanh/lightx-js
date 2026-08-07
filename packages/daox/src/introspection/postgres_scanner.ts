@@ -27,7 +27,20 @@ interface PgIndex {
   is_unique: boolean;
 }
 
+/**
+ * Anti-SSRF protocol validation (Tache 5.4).
+ * Only `postgres:` and `postgresql:` protocols are authorized.
+ */
+function validatePostgresUrl(url: string): void {
+  const parsed = new URL(url);
+  if (parsed.protocol !== 'postgres:' && parsed.protocol !== 'postgresql:') {
+    throw new Error('SECURITY: Invalid database protocol');
+  }
+}
+
 export async function scanPostgres(url: string): Promise<DatabaseSchema> {
+  validatePostgresUrl(url);
+
   const sql = postgres(url, { max: 1 });
 
   const tablesResult = await sql<PgTable[]>`
@@ -147,7 +160,8 @@ export async function scanPostgres(url: string): Promise<DatabaseSchema> {
       if (!indexMap.has(ix.index_name)) {
         indexMap.set(ix.index_name, { name: ix.index_name, columns: [], isUnique: ix.is_unique });
       }
-      indexMap.get(ix.index_name)!.columns.push(ix.column_name);
+      const entry = indexMap.get(ix.index_name);
+      if (entry) entry.columns.push(ix.column_name);
     }
     table.indexes = Array.from(indexMap.values());
 

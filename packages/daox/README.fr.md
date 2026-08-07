@@ -238,4 +238,37 @@ await sql.begin(async (txSql) => {
 
 ---
 
+## Espace de Tests (Unitaires et Intégration)
+
+Pour garantir sa rigueur paramétrique "Zero-Fail", Daox inclut une batterie de tests complète.
+
+### 1. Tests Unitaires (AOT & Sécurité)
+
+Les tests unitaires vérifient les scanners SQL, la sécurité Anti-SSRF, les protections de Path Traversal, OOM, et les générateurs SOTA.
+
+```bash
+npm run test:unit
+```
+
+### 2. Tests d'Intégration BDD (Multi-Dialectes)
+
+Les tests d'intégration valident la compilation Daox complète directement contre de réelles bases de données isolées (via Docker Compose).
+
+Assurez-vous qu'une instance Docker est disponible, puis :
+
+```bash
+# Lance l'infrastructure Docker (MySQL, Postgres, SQL Server, Oracle)
+npm run test:db:up
+
+# Exécute tous les tests d'intégration Bare-Metal sur les 5 drivers
+npm run test:integration
+
+# Coupe et nettoie l'infrastructure Docker
+npm run test:db:down
+```
+
+_(Toutes les connexions aux instances de test, incluant la DB SQLite volatile, sont centralisées architecturalement dans le fichier interne `tests/db_config.ts`)._
+
+---
+
 > Construit de zéro avec une discipline architecturale militaire pour l'**écosystème LightX**.

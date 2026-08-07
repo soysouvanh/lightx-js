@@ -1,22 +1,21 @@
 import { TableSchema } from '../introspection/types.js';
 
 /**
- * Safely escapes string literals strictly neutralizing newline and quote breakage inside generated TypeScript signatures.
- * @param str The raw unverified string property name.
- * @returns {string} The computationally evaluated strictly safe string.
+ * Safely escapes string literals neutralizing quote breakage inside generated TypeScript signatures.
+ * @param str - The raw unverified string property name.
+ * @returns The safely escaped string.
  */
 function escapeStringLiteral(str: string): string {
-  return str.replace(/"/g, '\\"');
+  return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
 /**
- * Military-grade DTO (Data Transfer Object) generator engine.
+ * AOT DTO (Data Transfer Object) generator engine.
  * Computes exact TypeScript interfaces representing the physical architecture of the Database Row.
- * Infers absolute strict parameters, intelligently extracting \`Omit\` and \`Partial\` logic 
- * determining which database columns are globally required vs auto-incremented or defaulted.
- * 
- * @param table The introspected Table AST schema structure.
- * @returns {string} A strict, frozen block of TypeScript Code containing \`Row\`, \`Insert\`, and \`Patch\` boundaries.
+ * Infers strict `Omit` and `Partial` logic determining which columns are required vs auto-incremented or defaulted.
+ *
+ * @param table - The introspected Table AST schema structure.
+ * @returns A strict block of TypeScript code containing `Row`, `Insert`, and `Patch` boundaries.
  */
 export function buildTableInterfaces(table: TableSchema): string {
   const safeTable = table.name.replace(/[^a-zA-Z0-9_$]/g, '_');

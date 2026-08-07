@@ -6,7 +6,24 @@ type OracleColumn = [string, string, string, string, string | null, string];
 type OraclePk = [string, string];
 type OracleIndex = [string, string, string, string];
 
+/**
+ * Anti-SSRF protocol validation (Tache 5.4).
+ * Only `oracle:` protocol is authorized for Oracle connections.
+ * Note: OracleDB also accepts connection strings; this validates URL-style inputs.
+ */
+function validateOracleUrl(url: string): void {
+  // Oracle connection strings may not be URL-parseable; only validate if it looks like a URL
+  if (url.includes('://')) {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'oracle:' && parsed.protocol !== 'oracledb:') {
+      throw new Error('SECURITY: Invalid database protocol');
+    }
+  }
+}
+
 export async function scanOracle(url: string): Promise<DatabaseSchema> {
+  validateOracleUrl(url);
+
   const conn = await oracledb.getConnection(url);
 
   const tablesResult = await conn.execute<OracleTable>(`
@@ -106,7 +123,8 @@ export async function scanOracle(url: string): Promise<DatabaseSchema> {
           isUnique: ixRow[3] === 'UNIQUE'
         });
       }
-      idxMap.get(idxName)!.columns.push(String(ixRow[2]).toLowerCase());
+      const entry = idxMap.get(idxName);
+      if (entry) entry.columns.push(String(ixRow[2]).toLowerCase());
     }
     table.indexes = Array.from(idxMap.values());
     schema.tables.push(table);

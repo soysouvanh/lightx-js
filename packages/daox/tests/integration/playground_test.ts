@@ -6,9 +6,10 @@ import { fileURLToPath } from 'url';
 import { UsersDao, RolesDao } from './playground_daox.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import { DB_CONFIG } from '../db_config.js';
 
 test('E2E Database Validation - Daox Full Core Loop', async () => {
-    const dbPath = path.resolve(__dirname, 'playground.db');
+    const dbPath = DB_CONFIG.sqlitePlaygroundPath;
     const db = new Database(dbPath);
     const exe = new SqliteExecutor(db);
     

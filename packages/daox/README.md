@@ -238,4 +238,37 @@ await sql.begin(async (txSql) => {
 
 ---
 
+## Testing Environment (Unit & Integration)
+
+To guarantee its "Zero-Fail" parametric rigor, Daox includes a comprehensive test suite.
+
+### 1. Unit Tests (AOT & Security)
+
+Unit tests verify the SQL scanners, Anti-SSRF security, Path Traversal protections, OOM safeguards, and the SOTA generators.
+
+```bash
+npm run test:unit
+```
+
+### 2. DB Integration Tests (Multi-Dialect)
+
+Integration tests validate the entire Daox compilation directly against real, isolated databases (via Docker Compose).
+
+Ensure that a Docker daemon context is available, then:
+
+```bash
+# Boot up the Docker infrastructure (MySQL, Postgres, SQL Server, Oracle)
+npm run test:db:up
+
+# Execute all Bare-Metal integration tests across the 5 drivers
+npm run test:integration
+
+# Wipe and teardown the Docker infrastructure
+npm run test:db:down
+```
+
+_(All connections to the test instances, including the volatile SQLite DB, are architecturally centralized in the internal `tests/db_config.ts` file)._
+
+---
+
 > Built from scratch with military architectural discipline for the **LightX ecosystem**.
