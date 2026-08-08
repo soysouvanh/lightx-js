@@ -3,7 +3,7 @@
 > **Le moteur de template AOT "Extreme Bare-Metal" conçu pour Node.js et TypeScript.**
 
 <p align="center">
-  <img src="./assets/tmplx_architecture_fr.svg" alt="Diagramme d'architecture AOT Tmplx">
+  <img src="https://raw.githubusercontent.com/soysouvanh/lightx-js/main/packages/tmplx/assets/tmplx_architecture_fr.svg" alt="Diagramme d'architecture AOT Tmplx">
 </p>
 
 **Tmplx** redéfinit le rendu côté serveur (SSR). Au lieu d'analyser vos fichiers HTML à chaque requête HTTP (comme EJS, Pug ou Nunjucks), Tmplx agit comme un compilateur **AOT (Ahead-Of-Time)** pré-calculé.

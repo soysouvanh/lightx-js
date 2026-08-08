@@ -3,7 +3,7 @@
 > **The "Extreme Bare-Metal" AOT template engine engineered for Node.js and TypeScript.**
 
 <p align="center">
-  <img src="./assets/tmplx_architecture_en.svg" alt="Tmplx AOT architecture diagram">
+  <img src="https://raw.githubusercontent.com/soysouvanh/lightx-js/main/packages/tmplx/assets/tmplx_architecture_en.svg" alt="Tmplx AOT architecture diagram">
 </p>
 
 **Tmplx** redefines server-side rendering (SSR). Instead of reading your HTML files and parsing them repeatedly on every dynamic HTTP request (as Pug, EJS, or Nunjucks do), Tmplx operates as an **AOT (Ahead-Of-Time)** compiler.
