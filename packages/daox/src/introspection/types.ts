@@ -50,6 +50,20 @@ export interface ColumnSchema {
   hasDefault: boolean;
   /** Maps natively to Identity/Auto-Increment columns, omitting them from structural Inserts. */
   isAutoIncrement: boolean;
+  /** Minimum string length boundary to prevent constraints violations. */
+  minLength?: number;
+  /** Maximum string buffer length boundary to prevent Buffer Overflows. */
+  maxLength?: number;
+  /** Minimum numeric boundary to prevent Underflows and logical errors. */
+  minValue?: number;
+  /** Maximum numeric boundary to prevent Overflows. */
+  maxValue?: number;
+  /** Regex pattern for strict string formatting and ReDoS prevention. */
+  format?: string;
+  /** Predefined strict whitelist of allowed enumeration values. */
+  enumValues?: string[];
+  /** Array of specific business rules attached to this column. */
+  businessRules?: string[];
 }
 
 /**

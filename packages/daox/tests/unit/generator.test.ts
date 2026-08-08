@@ -189,4 +189,66 @@ describe('TS Code Generator (AOT)', () => {
             }
         });
     });
+
+    describe('Schema Registry Engine (AOT Validation)', () => {
+        const mockSchemaForRegistry = {
+            tables: [
+                {
+                    name: 'valid_table',
+                    columns: [
+                        { name: 'valid_col', sqlType: 'TEXT', typeLocal: 'string', isNullable: false, hasDefault: false, isAutoIncrement: false },
+                        { name: '__proto__', sqlType: 'TEXT', typeLocal: 'string', isNullable: false, hasDefault: false, isAutoIncrement: false },
+                        { name: 'constructor', sqlType: 'TEXT', typeLocal: 'string', isNullable: false, hasDefault: false, isAutoIncrement: false },
+                        { name: 'col"with"quotes', sqlType: 'VARCHAR', typeLocal: 'string', isNullable: true, hasDefault: false, isAutoIncrement: false }
+                    ],
+                    primaryKeys: ['valid_col'],
+                    indexes: [{ name: 'idx_1', columns: ['valid_col'], isUnique: true }]
+                },
+                {
+                    name: '__proto__',
+                    columns: [{ name: 'dummy', sqlType: 'TEXT', typeLocal: 'string', isNullable: true, hasDefault: false, isAutoIncrement: false }],
+                    primaryKeys: [],
+                    indexes: []
+                },
+                {
+                    name: 'constructor',
+                    columns: [{ name: 'dummy', sqlType: 'TEXT', typeLocal: 'string', isNullable: true, hasDefault: false, isAutoIncrement: false }],
+                    primaryKeys: [],
+                    indexes: []
+                }
+            ]
+        };
+
+        it('should correctly format and escape standard valid metadata natively into a JSON representation', async () => {
+            const { buildSchemaRegistry } = await import('../../src/generator/registry_builder.js');
+            const result = buildSchemaRegistry(mockSchemaForRegistry);
+            
+            expect(result).toContain('export const DaoxSchemaRegistry');
+            expect(result).toContain('"valid_table": {');
+            expect(result).toContain('"valid_col": {');
+            // Escapes checks
+            expect(result).toContain('"col\\"with\\"quotes": {');
+        });
+
+        it('should flawlessly drop malicious Prototype Pollution table names (__proto__, constructor) from AOT output', async () => {
+            const { buildSchemaRegistry } = await import('../../src/generator/registry_builder.js');
+            const result = buildSchemaRegistry(mockSchemaForRegistry);
+            
+            // \`__proto__\` and \`constructor\` should be entirely absent from the table keys
+            expect(result).not.toContain('"__proto__": {');
+            expect(result).not.toContain('"constructor": {');
+            
+            // But checking if "valid_table" is still exported
+            expect(result).toContain('"valid_table": {');
+        });
+
+        it('should flawlessly drop malicious Prototype Pollution column names from AOT output', async () => {
+            const { buildSchemaRegistry } = await import('../../src/generator/registry_builder.js');
+            const result = buildSchemaRegistry(mockSchemaForRegistry);
+            
+            // Inside valid_table, __proto__ and constructor must be omitted
+            expect(result).not.toContain('name: "__proto__"');
+            expect(result).not.toContain('name: "constructor"');
+        });
+    });
 });

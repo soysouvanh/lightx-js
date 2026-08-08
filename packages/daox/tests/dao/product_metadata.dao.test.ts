@@ -16,7 +16,7 @@ describe('Product_metadataDao', () => {
   describe('CRUD Methods', () => {
     it('should execute insert appropriately', async () => {
       mockExecutor.query.mockResolvedValueOnce([{}]);
-      await Product_metadataDao.insert(mockExecutor, { _dummy: 1 } as any);
+      await Product_metadataDao.insert(mockExecutor, { "id": 1 } as any);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
 
@@ -27,7 +27,7 @@ describe('Product_metadataDao', () => {
     });
 
     it('should execute updateById', async () => {
-      await Product_metadataDao.updateById(mockExecutor, 1 as any, { _dummy: 1 } as any);
+      await Product_metadataDao.updateById(mockExecutor, 1 as any, { "id": 1 } as any);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
 
@@ -51,7 +51,7 @@ describe('Product_metadataDao', () => {
     });
 
     it('should execute insertBatch', async () => {
-      await Product_metadataDao.insertBatch(mockExecutor, [{ _dummy: 1 } as any]);
+      await Product_metadataDao.insertBatch(mockExecutor, [{ "id": 1 } as any]);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
   });

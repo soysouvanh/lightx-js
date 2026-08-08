@@ -6,3 +6,4 @@ export * from './order_items.dao.js';
 export * from './product_metadata.dao.js';
 export * from './user_roles.dao.js';
 export * from './users.dao.js';
+export * from './registry.js';

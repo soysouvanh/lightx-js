@@ -16,9 +16,10 @@ export type UsersInsert = Omit<UsersRow, "id" | "status" | "created_at"> & Parti
 export type UsersPatch = Partial<UsersInsert>;
 
 export class UsersDao {
+  private static readonly _VALID_COLS = new Set(["id","email","first_name","last_name","status","created_at"]);
 
   static async insert(exe: GenericExecutor, data: UsersInsert): Promise<UsersRow> {
-    const keys = Object.keys(data) as Array<keyof typeof data>;
+    const keys = Object.keys(data).filter(k => UsersDao._VALID_COLS.has(k)) as Array<keyof typeof data>;
     if (keys.length === 0) {
       const rows = await exe.query<UsersRow>("INSERT INTO \`users\` () VALUES ()");
       return rows[0] as UsersRow;
@@ -50,7 +51,7 @@ export class UsersDao {
   }
 
   static async updateById(exe: GenericExecutor, pk: bigint, patch: UsersPatch): Promise<void> {
-    const keys = Object.keys(patch) as Array<keyof typeof patch>;
+    const keys = Object.keys(patch).filter(k => UsersDao._VALID_COLS.has(k)) as Array<keyof typeof patch>;
     if (keys.length === 0) return;
     const sets = keys.map((k, i) => `${escapeIdentifier("mysql", k as string)} = ?`).join(", ");
     const pkParam = "?";
@@ -94,6 +95,42 @@ export class UsersDao {
     return Number(rows[0] ? rows[0].c : 0);
   }
 
+  static async existsByFirst_name(exe: GenericExecutor, first_name: string | null): Promise<boolean> {
+    const sql = "SELECT 1 AS e FROM \`users\` WHERE \`first_name\` = ? LIMIT 1";
+    const rows = await exe.query<{ e: number }>(sql, [first_name]);
+    return rows.length > 0;
+  }
+
+  static async findAllByFirst_name(exe: GenericExecutor, first_name: string | null): Promise<UsersRow[]> {
+    const sql = "SELECT * FROM \`users\` WHERE \`first_name\` = ?";
+    const rows = await exe.query<UsersRow>(sql, [first_name]);
+    return rows;
+  }
+
+  static async countByFirst_name(exe: GenericExecutor, first_name: string | null): Promise<number> {
+    const sql = "SELECT COUNT(*) as c FROM \`users\` WHERE \`first_name\` = ?";
+    const rows = await exe.query<{ c: string | number | bigint }>(sql, [first_name]);
+    return Number(rows[0] ? rows[0].c : 0);
+  }
+
+  static async existsByLast_name(exe: GenericExecutor, last_name: string): Promise<boolean> {
+    const sql = "SELECT 1 AS e FROM \`users\` WHERE \`last_name\` = ? LIMIT 1";
+    const rows = await exe.query<{ e: number }>(sql, [last_name]);
+    return rows.length > 0;
+  }
+
+  static async findAllByLast_name(exe: GenericExecutor, last_name: string): Promise<UsersRow[]> {
+    const sql = "SELECT * FROM \`users\` WHERE \`last_name\` = ?";
+    const rows = await exe.query<UsersRow>(sql, [last_name]);
+    return rows;
+  }
+
+  static async countByLast_name(exe: GenericExecutor, last_name: string): Promise<number> {
+    const sql = "SELECT COUNT(*) as c FROM \`users\` WHERE \`last_name\` = ?";
+    const rows = await exe.query<{ c: string | number | bigint }>(sql, [last_name]);
+    return Number(rows[0] ? rows[0].c : 0);
+  }
+
 
   static listByCursor(exe: GenericExecutor, lastCursor: bigint | null | undefined, limit: number): AsyncIterable<UsersRow> {
     if (lastCursor === null || lastCursor === undefined) {
@@ -109,7 +146,8 @@ export class UsersDao {
 
   static async insertBatch(exe: GenericExecutor, items: UsersInsert[]): Promise<void> {
     if (items.length === 0) return;
-    const keys = Object.keys(items[0] as unknown as Record<string, unknown>);
+    const keys = Object.keys(items[0] as unknown as Record<string, unknown>).filter(k => UsersDao._VALID_COLS.has(k));
+    if (keys.length === 0) return;
     const cols = keys.map(k => escapeIdentifier("mysql", k)).join(", ");
     const colCount = keys.length;
     const maxRows = Math.floor(65535 / Math.max(colCount, 1));

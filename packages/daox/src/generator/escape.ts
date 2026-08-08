@@ -23,3 +23,17 @@ export function escapeIdentifier(dialect: string, identifier: string): string {
       throw new Error(`SECURITY: Unsupported dialect for escaping: ${dialect}`);
   }
 }
+
+/**
+ * Safely converts an arbitrary SQL identifier into a valid TypeScript identifier.
+ * Ensures the generated code compiles successfully (e.g., prefixing numbers if it starts with one).
+ * Mitigates SyntaxErrors dynamically injected via non-conforming table or column schemas.
+ */
+export function toSafeTsIdentifier(name: string, fallback: string = 'empty'): string {
+  let safe = name.replace(/[^a-zA-Z0-9_$]/g, '_');
+  if (!safe) safe = '_' + fallback + '_';
+  if (/^[0-9]/.test(safe)) {
+    return '_' + safe;
+  }
+  return safe;
+}

@@ -13,9 +13,10 @@ export type Order_itemsInsert = Omit<Order_itemsRow, "quantity"> & Partial<Pick<
 export type Order_itemsPatch = Partial<Order_itemsInsert>;
 
 export class Order_itemsDao {
+  private static readonly _VALID_COLS = new Set(["order_id","product_id","quantity"]);
 
   static async insert(exe: GenericExecutor, data: Order_itemsInsert): Promise<Order_itemsRow> {
-    const keys = Object.keys(data) as Array<keyof typeof data>;
+    const keys = Object.keys(data).filter(k => Order_itemsDao._VALID_COLS.has(k)) as Array<keyof typeof data>;
     if (keys.length === 0) {
       const rows = await exe.query<Order_itemsRow>("INSERT INTO \`order_items\` () VALUES ()");
       return rows[0] as Order_itemsRow;
@@ -36,7 +37,8 @@ export class Order_itemsDao {
 
   static async insertBatch(exe: GenericExecutor, items: Order_itemsInsert[]): Promise<void> {
     if (items.length === 0) return;
-    const keys = Object.keys(items[0] as unknown as Record<string, unknown>);
+    const keys = Object.keys(items[0] as unknown as Record<string, unknown>).filter(k => Order_itemsDao._VALID_COLS.has(k));
+    if (keys.length === 0) return;
     const cols = keys.map(k => escapeIdentifier("mysql", k)).join(", ");
     const colCount = keys.length;
     const maxRows = Math.floor(65535 / Math.max(colCount, 1));

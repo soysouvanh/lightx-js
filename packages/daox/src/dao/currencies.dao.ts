@@ -12,9 +12,10 @@ export type CurrenciesInsert = CurrenciesRow;
 export type CurrenciesPatch = Partial<CurrenciesInsert>;
 
 export class CurrenciesDao {
+  private static readonly _VALID_COLS = new Set(["code","name"]);
 
   static async insert(exe: GenericExecutor, data: CurrenciesInsert): Promise<CurrenciesRow> {
-    const keys = Object.keys(data) as Array<keyof typeof data>;
+    const keys = Object.keys(data).filter(k => CurrenciesDao._VALID_COLS.has(k)) as Array<keyof typeof data>;
     if (keys.length === 0) {
       const rows = await exe.query<CurrenciesRow>("INSERT INTO \`currencies\` () VALUES ()");
       return rows[0] as CurrenciesRow;
@@ -46,7 +47,7 @@ export class CurrenciesDao {
   }
 
   static async updateByCode(exe: GenericExecutor, pk: string, patch: CurrenciesPatch): Promise<void> {
-    const keys = Object.keys(patch) as Array<keyof typeof patch>;
+    const keys = Object.keys(patch).filter(k => CurrenciesDao._VALID_COLS.has(k)) as Array<keyof typeof patch>;
     if (keys.length === 0) return;
     const sets = keys.map((k, i) => `${escapeIdentifier("mysql", k as string)} = ?`).join(", ");
     const pkParam = "?";
@@ -74,7 +75,8 @@ export class CurrenciesDao {
 
   static async insertBatch(exe: GenericExecutor, items: CurrenciesInsert[]): Promise<void> {
     if (items.length === 0) return;
-    const keys = Object.keys(items[0] as unknown as Record<string, unknown>);
+    const keys = Object.keys(items[0] as unknown as Record<string, unknown>).filter(k => CurrenciesDao._VALID_COLS.has(k));
+    if (keys.length === 0) return;
     const cols = keys.map(k => escapeIdentifier("mysql", k)).join(", ");
     const colCount = keys.length;
     const maxRows = Math.floor(65535 / Math.max(colCount, 1));

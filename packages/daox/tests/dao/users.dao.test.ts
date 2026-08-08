@@ -16,7 +16,7 @@ describe('UsersDao', () => {
   describe('CRUD Methods', () => {
     it('should execute insert appropriately', async () => {
       mockExecutor.query.mockResolvedValueOnce([{}]);
-      await UsersDao.insert(mockExecutor, { _dummy: 1 } as any);
+      await UsersDao.insert(mockExecutor, { "id": 1 } as any);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
 
@@ -27,7 +27,7 @@ describe('UsersDao', () => {
     });
 
     it('should execute updateById', async () => {
-      await UsersDao.updateById(mockExecutor, 1 as any, { _dummy: 1 } as any);
+      await UsersDao.updateById(mockExecutor, 1 as any, { "id": 1 } as any);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
 
@@ -47,6 +47,18 @@ describe('UsersDao', () => {
       await UsersDao.findAllByLast_nameAndFirst_name(mockExecutor, 1 as any, 2 as any);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
+
+    it('should execute findAllByFirst_name', async () => {
+      mockExecutor.query.mockResolvedValueOnce([{}]);
+      await UsersDao.findAllByFirst_name(mockExecutor, 1 as any);
+      expect(mockExecutor.query).toHaveBeenCalled();
+    });
+
+    it('should execute findAllByLast_name', async () => {
+      mockExecutor.query.mockResolvedValueOnce([{}]);
+      await UsersDao.findAllByLast_name(mockExecutor, 1 as any);
+      expect(mockExecutor.query).toHaveBeenCalled();
+    });
   });
 
   describe('Advanced Methods', () => {
@@ -63,7 +75,7 @@ describe('UsersDao', () => {
     });
 
     it('should execute insertBatch', async () => {
-      await UsersDao.insertBatch(mockExecutor, [{ _dummy: 1 } as any]);
+      await UsersDao.insertBatch(mockExecutor, [{ "id": 1 } as any]);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
   });

@@ -1,5 +1,5 @@
 import { TableSchema } from '../introspection/types.js';
-import { escapeIdentifier } from './escape.js';
+import { escapeIdentifier, toSafeTsIdentifier } from './escape.js';
 
 /**
  * Maximum parameter counts per dialect for insertBatch chunking (Tache 3.4).
@@ -57,7 +57,7 @@ function resolvePkType(table: TableSchema): string {
  * @returns Generated TypeScript methods as a string.
  */
 export function buildAdvancedMethods(dialect: string, table: TableSchema): string {
-  const safeTable = table.name.replace(/[^a-zA-Z0-9_$]/g, '_');
+  const safeTable = toSafeTsIdentifier(table.name, 'table');
   const entity = safeTable.charAt(0).toUpperCase() + safeTable.slice(1);
   const escTable = jsStringEscape(escapeIdentifier(dialect, table.name));
 
@@ -183,7 +183,8 @@ export function buildAdvancedMethods(dialect: string, table: TableSchema): strin
   const insertBatchMethod = `
   static async insertBatch(exe: GenericExecutor, items: ${entity}Insert[]): Promise<void> {
     if (items.length === 0) return;
-    const keys = Object.keys(items[0] as unknown as Record<string, unknown>);
+    const keys = Object.keys(items[0] as unknown as Record<string, unknown>).filter(k => ${entity}Dao._VALID_COLS.has(k));
+    if (keys.length === 0) return;
     const cols = keys.map(k => escapeIdentifier("${dialect}", k)).join(", ");
     const colCount = keys.length;
     const maxRows = Math.floor(${maxParams} / Math.max(colCount, 1));

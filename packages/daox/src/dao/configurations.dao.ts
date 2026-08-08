@@ -14,9 +14,10 @@ export type ConfigurationsInsert = Omit<ConfigurationsRow, "id">;
 export type ConfigurationsPatch = Partial<ConfigurationsInsert>;
 
 export class ConfigurationsDao {
+  private static readonly _VALID_COLS = new Set(["id","type","match","value"]);
 
   static async insert(exe: GenericExecutor, data: ConfigurationsInsert): Promise<ConfigurationsRow> {
-    const keys = Object.keys(data) as Array<keyof typeof data>;
+    const keys = Object.keys(data).filter(k => ConfigurationsDao._VALID_COLS.has(k)) as Array<keyof typeof data>;
     if (keys.length === 0) {
       const rows = await exe.query<ConfigurationsRow>("INSERT INTO \`configurations\` () VALUES ()");
       return rows[0] as ConfigurationsRow;
@@ -48,7 +49,7 @@ export class ConfigurationsDao {
   }
 
   static async updateById(exe: GenericExecutor, pk: number, patch: ConfigurationsPatch): Promise<void> {
-    const keys = Object.keys(patch) as Array<keyof typeof patch>;
+    const keys = Object.keys(patch).filter(k => ConfigurationsDao._VALID_COLS.has(k)) as Array<keyof typeof patch>;
     if (keys.length === 0) return;
     const sets = keys.map((k, i) => `${escapeIdentifier("mysql", k as string)} = ?`).join(", ");
     const pkParam = "?";
@@ -76,7 +77,8 @@ export class ConfigurationsDao {
 
   static async insertBatch(exe: GenericExecutor, items: ConfigurationsInsert[]): Promise<void> {
     if (items.length === 0) return;
-    const keys = Object.keys(items[0] as unknown as Record<string, unknown>);
+    const keys = Object.keys(items[0] as unknown as Record<string, unknown>).filter(k => ConfigurationsDao._VALID_COLS.has(k));
+    if (keys.length === 0) return;
     const cols = keys.map(k => escapeIdentifier("mysql", k)).join(", ");
     const colCount = keys.length;
     const maxRows = Math.floor(65535 / Math.max(colCount, 1));

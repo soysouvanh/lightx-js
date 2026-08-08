@@ -16,7 +16,7 @@ describe('Order_itemsDao', () => {
   describe('CRUD Methods', () => {
     it('should execute insert appropriately', async () => {
       mockExecutor.query.mockResolvedValueOnce([{}]);
-      await Order_itemsDao.insert(mockExecutor, { _dummy: 1 } as any);
+      await Order_itemsDao.insert(mockExecutor, { "order_id": 1 } as any);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
 
@@ -24,7 +24,7 @@ describe('Order_itemsDao', () => {
 
   describe('Advanced Methods', () => {
     it('should execute insertBatch', async () => {
-      await Order_itemsDao.insertBatch(mockExecutor, [{ _dummy: 1 } as any]);
+      await Order_itemsDao.insertBatch(mockExecutor, [{ "order_id": 1 } as any]);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
   });

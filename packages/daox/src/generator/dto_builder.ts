@@ -1,4 +1,5 @@
 import { TableSchema } from '../introspection/types.js';
+import { toSafeTsIdentifier } from './escape.js';
 
 /**
  * Safely escapes string literals neutralizing quote breakage inside generated TypeScript signatures.
@@ -18,7 +19,7 @@ function escapeStringLiteral(str: string): string {
  * @returns A strict block of TypeScript code containing `Row`, `Insert`, and `Patch` boundaries.
  */
 export function buildTableInterfaces(table: TableSchema): string {
-  const safeTable = table.name.replace(/[^a-zA-Z0-9_$]/g, '_');
+  const safeTable = toSafeTsIdentifier(table.name, 'table');
   const entity = safeTable.charAt(0).toUpperCase() + safeTable.slice(1);
   let rowProps = '';
 

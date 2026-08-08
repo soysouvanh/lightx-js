@@ -16,7 +16,7 @@ describe('ConfigurationsDao', () => {
   describe('CRUD Methods', () => {
     it('should execute insert appropriately', async () => {
       mockExecutor.query.mockResolvedValueOnce([{}]);
-      await ConfigurationsDao.insert(mockExecutor, { _dummy: 1 } as any);
+      await ConfigurationsDao.insert(mockExecutor, { "id": 1 } as any);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
 
@@ -27,7 +27,7 @@ describe('ConfigurationsDao', () => {
     });
 
     it('should execute updateById', async () => {
-      await ConfigurationsDao.updateById(mockExecutor, 1 as any, { _dummy: 1 } as any);
+      await ConfigurationsDao.updateById(mockExecutor, 1 as any, { "id": 1 } as any);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
 
@@ -51,7 +51,7 @@ describe('ConfigurationsDao', () => {
     });
 
     it('should execute insertBatch', async () => {
-      await ConfigurationsDao.insertBatch(mockExecutor, [{ _dummy: 1 } as any]);
+      await ConfigurationsDao.insertBatch(mockExecutor, [{ "id": 1 } as any]);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
   });

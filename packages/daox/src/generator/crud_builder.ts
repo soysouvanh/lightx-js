@@ -1,5 +1,5 @@
 import { TableSchema } from '../introspection/types.js';
-import { escapeIdentifier } from './escape.js';
+import { escapeIdentifier, toSafeTsIdentifier } from './escape.js';
 
 /**
  * Returns the parameter placeholder pattern for the given dialect.
@@ -77,7 +77,7 @@ function resolvePkType(table: TableSchema): string {
  * @returns Generated TypeScript CRUD methods as a string.
  */
 export function buildCrudMethods(dialect: string, table: TableSchema): string {
-  const safeTable = table.name.replace(/[^a-zA-Z0-9_$]/g, '_');
+  const safeTable = toSafeTsIdentifier(table.name, 'table');
   const entity = safeTable.charAt(0).toUpperCase() + safeTable.slice(1);
   const escTable = jsStringEscape(escapeIdentifier(dialect, table.name));
 
@@ -90,6 +90,8 @@ export function buildCrudMethods(dialect: string, table: TableSchema): string {
   const limitClause = getLimitClause(dialect);
   const isMssql = dialect === 'mssql' || dialect === 'sqlserver';
   const isMysql = dialect === 'mysql';
+
+  const validColsField = `  private static readonly _VALID_COLS = new Set(${JSON.stringify(table.columns.map(c => c.name))});`;
 
   // --- INSERT ---
   let insertDefaultSql: string;
@@ -114,7 +116,7 @@ export function buildCrudMethods(dialect: string, table: TableSchema): string {
 
   const insertMethod = `
   static async insert(exe: GenericExecutor, data: ${entity}Insert): Promise<${entity}Row> {
-    const keys = Object.keys(data) as Array<keyof typeof data>;
+    const keys = Object.keys(data).filter(k => ${entity}Dao._VALID_COLS.has(k)) as Array<keyof typeof data>;
     if (keys.length === 0) {
       const rows = await exe.query<${entity}Row>("${insertDefaultSql}");
       return rows[0] as ${entity}Row;
@@ -179,7 +181,7 @@ export function buildCrudMethods(dialect: string, table: TableSchema): string {
 
     updateMethod = `
   static async updateBy${PkTitle}(exe: GenericExecutor, pk: ${pkType}, patch: ${entity}Patch): Promise<void> {
-    const keys = Object.keys(patch) as Array<keyof typeof patch>;
+    const keys = Object.keys(patch).filter(k => ${entity}Dao._VALID_COLS.has(k)) as Array<keyof typeof patch>;
     if (keys.length === 0) return;
     const sets = keys.map((k, i) => ${setExpr}).join(", ");
     const pkParam = ${pkParamExpr};
@@ -214,10 +216,10 @@ export function buildCrudMethods(dialect: string, table: TableSchema): string {
     const colsParamsTs = idx.columns.map(c => {
       const col = table.columns.find(tc => tc.name === c);
       const colType = col ? col.typeLocal + (col.isNullable ? ' | null' : '') : 'unknown';
-      return `${c}: ${colType}`;
+      return `${toSafeTsIdentifier(c, 'col')}: ${colType}`;
     }).join(', ');
 
-    const colsVals = idx.columns.map(c => c).join(', ');
+    const colsVals = idx.columns.map(c => toSafeTsIdentifier(c, 'col')).join(', ');
     
     const whereClause = idx.columns.map((c, i) => {
       const escC = jsStringEscape(escapeIdentifier(dialect, c));
@@ -255,5 +257,5 @@ export function buildCrudMethods(dialect: string, table: TableSchema): string {
     }
   }
 
-  return [insertMethod, countMethod, findMethod, existsMethod, updateMethod, deleteMethod, indexMethods].filter(Boolean).join('\n');
+  return [validColsField, insertMethod, countMethod, findMethod, existsMethod, updateMethod, deleteMethod, indexMethods].filter(Boolean).join('\n');
 }

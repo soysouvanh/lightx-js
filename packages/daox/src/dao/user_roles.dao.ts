@@ -13,9 +13,10 @@ export type User_rolesInsert = Omit<User_rolesRow, "assigned_at"> & Partial<Pick
 export type User_rolesPatch = Partial<User_rolesInsert>;
 
 export class User_rolesDao {
+  private static readonly _VALID_COLS = new Set(["user_id","role_name","assigned_at"]);
 
   static async insert(exe: GenericExecutor, data: User_rolesInsert): Promise<User_rolesRow> {
-    const keys = Object.keys(data) as Array<keyof typeof data>;
+    const keys = Object.keys(data).filter(k => User_rolesDao._VALID_COLS.has(k)) as Array<keyof typeof data>;
     if (keys.length === 0) {
       const rows = await exe.query<User_rolesRow>("INSERT INTO \`user_roles\` () VALUES ()");
       return rows[0] as User_rolesRow;
@@ -40,16 +41,10 @@ export class User_rolesDao {
     return rows.length > 0;
   }
 
-  static async findAllByUser_id(exe: GenericExecutor, user_id: bigint): Promise<User_rolesRow[]> {
-    const sql = "SELECT * FROM \`user_roles\` WHERE \`user_id\` = ?";
+  static async findByUser_id(exe: GenericExecutor, user_id: bigint): Promise<User_rolesRow | null> {
+    const sql = "SELECT * FROM \`user_roles\` WHERE \`user_id\` = ? LIMIT 1";
     const rows = await exe.query<User_rolesRow>(sql, [user_id]);
-    return rows;
-  }
-
-  static async countByUser_id(exe: GenericExecutor, user_id: bigint): Promise<number> {
-    const sql = "SELECT COUNT(*) as c FROM \`user_roles\` WHERE \`user_id\` = ?";
-    const rows = await exe.query<{ c: string | number | bigint }>(sql, [user_id]);
-    return Number(rows[0] ? rows[0].c : 0);
+    return rows.length > 0 ? rows[0] as User_rolesRow : null;
   }
 
   static async existsByUser_idAndRole_name(exe: GenericExecutor, user_id: bigint, role_name: string): Promise<boolean> {
@@ -64,10 +59,23 @@ export class User_rolesDao {
     return rows.length > 0 ? rows[0] as User_rolesRow : null;
   }
 
+  static async existsByRole_name(exe: GenericExecutor, role_name: string): Promise<boolean> {
+    const sql = "SELECT 1 AS e FROM \`user_roles\` WHERE \`role_name\` = ? LIMIT 1";
+    const rows = await exe.query<{ e: number }>(sql, [role_name]);
+    return rows.length > 0;
+  }
+
+  static async findByRole_name(exe: GenericExecutor, role_name: string): Promise<User_rolesRow | null> {
+    const sql = "SELECT * FROM \`user_roles\` WHERE \`role_name\` = ? LIMIT 1";
+    const rows = await exe.query<User_rolesRow>(sql, [role_name]);
+    return rows.length > 0 ? rows[0] as User_rolesRow : null;
+  }
+
 
   static async insertBatch(exe: GenericExecutor, items: User_rolesInsert[]): Promise<void> {
     if (items.length === 0) return;
-    const keys = Object.keys(items[0] as unknown as Record<string, unknown>);
+    const keys = Object.keys(items[0] as unknown as Record<string, unknown>).filter(k => User_rolesDao._VALID_COLS.has(k));
+    if (keys.length === 0) return;
     const cols = keys.map(k => escapeIdentifier("mysql", k)).join(", ");
     const colCount = keys.length;
     const maxRows = Math.floor(65535 / Math.max(colCount, 1));

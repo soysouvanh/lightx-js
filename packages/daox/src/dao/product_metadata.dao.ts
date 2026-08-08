@@ -14,9 +14,10 @@ export type Product_metadataInsert = Product_metadataRow;
 export type Product_metadataPatch = Partial<Product_metadataInsert>;
 
 export class Product_metadataDao {
+  private static readonly _VALID_COLS = new Set(["id","category","attributes","raw_data"]);
 
   static async insert(exe: GenericExecutor, data: Product_metadataInsert): Promise<Product_metadataRow> {
-    const keys = Object.keys(data) as Array<keyof typeof data>;
+    const keys = Object.keys(data).filter(k => Product_metadataDao._VALID_COLS.has(k)) as Array<keyof typeof data>;
     if (keys.length === 0) {
       const rows = await exe.query<Product_metadataRow>("INSERT INTO \`product_metadata\` () VALUES ()");
       return rows[0] as Product_metadataRow;
@@ -48,7 +49,7 @@ export class Product_metadataDao {
   }
 
   static async updateById(exe: GenericExecutor, pk: Buffer, patch: Product_metadataPatch): Promise<void> {
-    const keys = Object.keys(patch) as Array<keyof typeof patch>;
+    const keys = Object.keys(patch).filter(k => Product_metadataDao._VALID_COLS.has(k)) as Array<keyof typeof patch>;
     if (keys.length === 0) return;
     const sets = keys.map((k, i) => `${escapeIdentifier("mysql", k as string)} = ?`).join(", ");
     const pkParam = "?";
@@ -76,7 +77,8 @@ export class Product_metadataDao {
 
   static async insertBatch(exe: GenericExecutor, items: Product_metadataInsert[]): Promise<void> {
     if (items.length === 0) return;
-    const keys = Object.keys(items[0] as unknown as Record<string, unknown>);
+    const keys = Object.keys(items[0] as unknown as Record<string, unknown>).filter(k => Product_metadataDao._VALID_COLS.has(k));
+    if (keys.length === 0) return;
     const cols = keys.map(k => escapeIdentifier("mysql", k)).join(", ");
     const colCount = keys.length;
     const maxRows = Math.floor(65535 / Math.max(colCount, 1));

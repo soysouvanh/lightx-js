@@ -312,6 +312,11 @@ await sql.begin(async (txSql) => {
 
 (_You Aren't Gonna Need It_). Daox génère rigoureusement l'essentiel. À titre d'exemple : si une Vue (`VIEW`) dans votre BDD ne matérialise pas de clé primaire, Daox se contentera de compiler exclusivement les fonctions de lecture et de streaming en lecture (`listByCursor`), refusant tout bonnement de créer les méthodes `updateById` ou les suppressions arbitraires. La rigidité mathématique du système prime avant tout.
 
+### Schema Validation & Registre Zero-Trust
+
+Daox extrait bien plus que la structure — il protège mathématiquement toute l'architecture. Les limites d'intégrité définies par les développeurs et compilées dans `./src/dao_overrides/schema/` (ex: `min_value`, `max_length`, expressions régulières de `format`) sont fusionnées en amont (_AOT_) dans un registre statique `registry.ts`.
+Cela offre aux surcouches applicatives (comme le framework LightX) un référentiel absolu pour exécuter une validation stricte des _inputs API_ en miroir exact avec les contraintes SQL associées, isolant la latence d'inférence loin du runtime de production.
+
 ### DAO Overrides (Surcharges métier)
 
 Bien que Daox génère la totalité de vos DAOs, de nombreux cas d'usage nécessitent d'injecter des requêtes métier complexes (ex: INNER JOIN, aggrégations) ou de forcer un comportement précis sur une méthode générée.

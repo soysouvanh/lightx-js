@@ -16,7 +16,7 @@ describe('CurrenciesDao', () => {
   describe('CRUD Methods', () => {
     it('should execute insert appropriately', async () => {
       mockExecutor.query.mockResolvedValueOnce([{}]);
-      await CurrenciesDao.insert(mockExecutor, { _dummy: 1 } as any);
+      await CurrenciesDao.insert(mockExecutor, { "code": 1 } as any);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
 
@@ -27,7 +27,7 @@ describe('CurrenciesDao', () => {
     });
 
     it('should execute updateByCode', async () => {
-      await CurrenciesDao.updateByCode(mockExecutor, 1 as any, { _dummy: 1 } as any);
+      await CurrenciesDao.updateByCode(mockExecutor, 1 as any, { "code": 1 } as any);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
 
@@ -51,7 +51,7 @@ describe('CurrenciesDao', () => {
     });
 
     it('should execute insertBatch', async () => {
-      await CurrenciesDao.insertBatch(mockExecutor, [{ _dummy: 1 } as any]);
+      await CurrenciesDao.insertBatch(mockExecutor, [{ "code": 1 } as any]);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
   });

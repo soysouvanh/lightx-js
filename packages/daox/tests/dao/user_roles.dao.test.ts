@@ -16,14 +16,14 @@ describe('User_rolesDao', () => {
   describe('CRUD Methods', () => {
     it('should execute insert appropriately', async () => {
       mockExecutor.query.mockResolvedValueOnce([{}]);
-      await User_rolesDao.insert(mockExecutor, { _dummy: 1 } as any);
+      await User_rolesDao.insert(mockExecutor, { "user_id": 1 } as any);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
 
 
-    it('should execute findAllByUser_id', async () => {
+    it('should execute findByUser_id', async () => {
       mockExecutor.query.mockResolvedValueOnce([{}]);
-      await User_rolesDao.findAllByUser_id(mockExecutor, 1 as any);
+      await User_rolesDao.findByUser_id(mockExecutor, 1 as any);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
 
@@ -32,11 +32,17 @@ describe('User_rolesDao', () => {
       await User_rolesDao.findByUser_idAndRole_name(mockExecutor, 1 as any, 2 as any);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
+
+    it('should execute findByRole_name', async () => {
+      mockExecutor.query.mockResolvedValueOnce([{}]);
+      await User_rolesDao.findByRole_name(mockExecutor, 1 as any);
+      expect(mockExecutor.query).toHaveBeenCalled();
+    });
   });
 
   describe('Advanced Methods', () => {
     it('should execute insertBatch', async () => {
-      await User_rolesDao.insertBatch(mockExecutor, [{ _dummy: 1 } as any]);
+      await User_rolesDao.insertBatch(mockExecutor, [{ "user_id": 1 } as any]);
       expect(mockExecutor.query).toHaveBeenCalled();
     });
   });

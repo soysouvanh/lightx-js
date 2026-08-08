@@ -312,6 +312,11 @@ await sql.begin(async (txSql) => {
 
 (_You Aren't Gonna Need It_). Daox strictly generates the essentials. For instance: if a View (`VIEW`) in your DB does not materialize a primary key, Daox will only compile reading and streaming read functions (`listByCursor`), flatly refusing to create `updateById` methods or arbitrary deletions. The mathematical rigidity of the system takes absolute precedence.
 
+### Schema Validation (Zero-Trust Registry)
+
+Daox extracts more than just data structures—it mathematically protects your entire architecture. Developer-defined validation boundaries evaluated and stored in `./src/dao_overrides/schema/` (e.g., `min_value`, `max_length`, `format` regexes) are structurally compiled ahead-of-time into a central `registry.ts`.
+This exposes a bare-metal source of truth for upstream layers (such as the LightX framework) to perform strict deterministic input validation aligned directly with actual database engine limits, eliminating completely any reflection latency at runtime.
+
 ### DAO Overrides (Custom business logic)
 
 While Daox generates all your DAOs, many use-cases require injecting complex business queries (e.g. INNER JOIN, aggregations) or overriding a specific generated method to mandate a behavior.
