@@ -1,6 +1,6 @@
 {
   "name": "@soysouvanh/daox",
-  "version": "1.0.4",
+  "version": "0.1.0",
   "description": "Daox is a “Bare-Metal” and Database-First ORM for Node.js and TypeScript, designed from scratch to achieve absolute pure performance and strictly zero overhead.",
   "keywords": [],
   "license": "ISC",
@@ -10,10 +10,16 @@
     "types": "./dist/index.d.ts",
     "import": "./dist/index.js"
   },
-  "main": "index.js",
+  "main": "dist/index.js",
   "bin": {
     "daox": "bin/daox.js"
   },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "README.fr.md"
+  ],
   "directories": {
     "doc": "docs",
     "test": "tests"

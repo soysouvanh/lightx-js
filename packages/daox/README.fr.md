@@ -8,11 +8,19 @@ Contrairement aux ORMs traditionnels qui s'appuient sur une lourde réflexion au
 
 Forgé pour l'écosystème LightX, Daox passe à l'échelle en toute sécurité, des applications légères aux API transactionnelles à très haute fréquence.
 
+<p align="center">
+  <img src="./assets/daox_architecture_fr.svg" alt="Daox Architecture AOT">
+</p>
+
 ---
 
 ## Principes fondamentaux
 
 ### Runtime zéro-overhead (piloté par AOT)
+
+<p align="center">
+  <img src="./assets/daox_runtime_fr.svg" alt="Daox Runtime">
+</p>
 
 Daox supprime la "taxe d'abstraction". Il n'y a absolument aucun parsing de méta-données, aucune réflexion de décorateurs et aucun moteur ORM global qui tourne dans la RAM de votre application. Les fichiers générés par Daox sont en TypeScript natif et invoquent de manière chirurgicale les Drivers SQL C++.
 

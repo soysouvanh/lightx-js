@@ -11,9 +11,9 @@ packages/*/dist/
 packages/*/bin/
 !packages/tmplx/bin/
 
-# Tmplx Artifacts
+# Framework Artifacts
 *.mmd
-packages/tmplx/assets/puppeteer-config.json
+**/puppeteer-config.json
 packages/tmplx/examples/out/
 
 # Daox Generated Artifacts & Test Databases

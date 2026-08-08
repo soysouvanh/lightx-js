@@ -1,15 +1,21 @@
 {
   "name": "@soysouvanh/tmplx",
-  "version": "1.0.0",
-  "description": "Extreme Bare-Metal AOT HTML Template Engine",
+  "version": "0.1.0",
+  "description": "Tmplx redefines server-side rendering (SSR). Instead of reading your HTML files and parsing them repeatedly on every dynamic HTTP request (as Pug, EJS, or Nunjucks do), Tmplx operates as an AOT (Ahead-Of-Time) compiler.",
   "type": "module",
   "exports": {
     "types": "./dist/index.d.ts",
     "import": "./dist/index.js"
   },
   "bin": {
-    "tmplx": "./bin/tmplx.js"
+    "tmplx": "bin/tmplx.js"
   },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "README.fr.md"
+  ],
   "scripts": {
     "build": "tsup src/index.ts src/cli/index.ts --format esm --dts --clean",
     "dev": "tsup src/index.ts src/cli/index.ts --format esm --watch",
