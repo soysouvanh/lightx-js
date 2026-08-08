@@ -1,5 +1,7 @@
 # @soysouvanh/tmplx
 
+**Languages:** [English](https://github.com/soysouvanh/lightx-js/blob/main/packages/tmplx/README.md) | [Français](https://github.com/soysouvanh/lightx-js/blob/main/packages/tmplx/README.fr.md)
+
 > **The "Extreme Bare-Metal" AOT template engine engineered for Node.js and TypeScript.**
 
 <p align="center">

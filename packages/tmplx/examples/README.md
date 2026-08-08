@@ -1,5 +1,7 @@
 # Tmplx: Example execution guide
 
+**Languages:** [English](https://github.com/soysouvanh/lightx-js/blob/main/packages/tmplx/examples/README.md) | [Français](https://github.com/soysouvanh/lightx-js/blob/main/packages/tmplx/examples/README.fr.md)
+
 > **Target audience:** Developers, architects, or enthusiasts.  
 > **Goal:** Learn how to bootstrap the `tmplx` AOT engine from scratch and visualize the output stream directly in your web browser.
 

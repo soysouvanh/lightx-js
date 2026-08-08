@@ -1,5 +1,7 @@
 # Tmplx : Guide d'exécution de la démonstration
 
+**Langues :** [English](https://github.com/soysouvanh/lightx-js/blob/main/packages/tmplx/examples/README.md) | [Français](https://github.com/soysouvanh/lightx-js/blob/main/packages/tmplx/examples/README.fr.md)
+
 > **Public ciblé :** Développeurs, architectes ou curieux.  
 > **But :** Apprendre à démarrer le parseur de template AOT `tmplx` depuis zéro et visualiser le rendu final dans un navigateur web.
 
