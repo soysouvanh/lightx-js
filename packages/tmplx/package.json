@@ -13,6 +13,7 @@
   "files": [
     "dist",
     "bin",
+    "assets",
     "README.md",
     "README.fr.md"
   ],
