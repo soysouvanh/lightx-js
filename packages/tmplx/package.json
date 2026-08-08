@@ -1,13 +1,33 @@
 {
   "name": "@soysouvanh/tmplx",
-  "version": "0.1.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "version": "1.0.0",
+  "description": "Extreme Bare-Metal AOT HTML Template Engine",
+  "type": "module",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.js"
   },
-  "keywords": [],
+  "bin": {
+    "tmplx": "./bin/tmplx.js"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/cli/index.ts --format esm --dts --clean",
+    "dev": "tsup src/index.ts src/cli/index.ts --format esm --watch",
+    "test": "node --experimental-strip-types --no-warnings --test tests/unit/*.test.js tests/unit/*.test.ts",
+    "test:oom": "node --max-old-space-size=32 tests/oom.js"
+  },
+  "keywords": [
+    "template",
+    "engine",
+    "aot",
+    "bare-metal",
+    "html"
+  ],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  }
 }

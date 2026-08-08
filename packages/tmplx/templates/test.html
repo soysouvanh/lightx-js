@@ -1,0 +1,7 @@
+<h1>Hello</h1>
+{% include "partial.html" %} {% block content %} default {% endblock %}
+<ul>
+{% for (const item of view_data.items) { %}
+  <li>{%%= item.name %}</li>
+{% } %}
+</ul>

@@ -1,0 +1,18 @@
+{% extends '../_layout.html' %}
+
+{% block title %}Profile of {%%= view_data.user.name %}{% endblock %}
+
+{% block content %}
+    <section>
+        <h2>User Overview</h2>
+        
+        <!-- Inclusion of a reusable component -->
+        {% include '../_components/user_card.html' %}
+
+        <div>
+            <h3>Raw Bio (Safe HTML Injection)</h3>
+            <!-- Raw injection : Bypasses XSS escaping for trusted HTML -->
+            <div>{%= view_data.user.bioHtml %}</div>
+        </div>
+    </section>
+{% endblock %}

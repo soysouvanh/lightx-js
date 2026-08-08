@@ -56,4 +56,18 @@ Déployez les ressources en fonction de l'application construite :
 - [**`@soysouvanh/tmplx`**](./packages/tmplx/) – Moteur d'agglomération et de rendu HTML.
 - [**`@soysouvanh/lightx`**](./packages/lightx/) – Le routeur d'infrastructure web minimaliste.
 
+---
+
+## Tests et Développement
+
+LightX utilise une structure de monorepo. Vous pouvez lancer les tests globalement depuis la racine du dépôt pour valider tous les packages simultanément.
+
+```bash
+# Installer les dépendances pour tous les espaces de travail (workspaces)
+npm install
+
+# Lancer tous les tests unitaires et intégrations sur tout l'écosystème
+npm run test:all
+```
+
 _Conçu méticuleusement pour une performance, sécurité et productivité extrême._

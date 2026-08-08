@@ -56,4 +56,18 @@ Deploy resources matching your designated application structure:
 - [**`@soysouvanh/tmplx`**](./packages/tmplx/) – HTML engine rendering and agglomeration.
 - [**`@soysouvanh/lightx`**](./packages/lightx/) – The minimalist web networking infrastructure router.
 
+---
+
+## Testing & Development
+
+LightX uses a monorepo structure. You can run tests globally from the repository root to validate all packages simultaneously.
+
+```bash
+# Install dependencies for all workspaces
+npm install
+
+# Run all unit and integration tests across the entire ecosystem
+npm run test:all
+```
+
 _Meticulously designed for extreme performance, security, and productivity._

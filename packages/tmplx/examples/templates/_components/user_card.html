@@ -1,0 +1,15 @@
+<div class="card">
+    <!-- XSS Guard in action : automatic escaping -->
+    <h2>{%%= view_data.user.name %}</h2>
+    
+    {% if (view_data.user.isAdmin) { %}
+        <span class="badge">Admin</span>
+    {% } %}
+
+    <!-- Space Stripping : control flow without HTML blank lines -->
+    <ul>
+    {%- for (const right of view_data.user.rights) { -%}
+        <li>{%%= right %}</li>
+    {%- } -%}
+    </ul>
+</div>
