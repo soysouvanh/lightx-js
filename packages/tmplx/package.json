@@ -1,7 +1,7 @@
 {
   "name": "@soysouvanh/tmplx",
-  "version": "0.1.0",
-  "description": "Tmplx redefines server-side rendering (SSR). Instead of reading your HTML files and parsing them repeatedly on every dynamic HTTP request (as Pug, EJS, or Nunjucks do), Tmplx operates as an AOT (Ahead-Of-Time) compiler.",
+  "version": "0.1.2",
+  "description": "The \"Extreme Bare-Metal\" AOT template engine engineered for Node.js and TypeScript.",
   "type": "module",
   "exports": {
     "types": "./dist/index.d.ts",
