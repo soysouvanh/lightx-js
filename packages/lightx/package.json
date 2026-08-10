@@ -1,9 +1,37 @@
 {
   "name": "@soysouvanh/lightx",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "description": "LightX is a “Bare-Metal” Next-Gen Web Framework for Node.js and TypeScript, engineered for extreme O(1) runtime performances, strict AOT compilation, and native security.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/soysouvanh/lightx-js.git"
+  },
+  "keywords": [
+    "lightx",
+    "framework",
+    "bare-metal",
+    "nodejs",
+    "typescript",
+    "performance",
+    "aot"
+  ],
+  "license": "ISC",
+  "author": "",
   "type": "module",
+  "main": "dist/index.js",
   "bin": {
     "lightx": "./bin/lightx.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "template",
+    "README.md",
+    "README.fr.md"
+  ],
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
   },
   "scripts": {
     "test": "npx tsx --test tests/unit/**/*.test.ts"

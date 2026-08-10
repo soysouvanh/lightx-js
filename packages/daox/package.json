@@ -1,12 +1,22 @@
 {
   "name": "@soysouvanh/daox",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Daox is a “Bare-Metal” and Database-First ORM for Node.js and TypeScript, designed from scratch to achieve absolute pure performance and strictly zero overhead.",
   "repository": {
     "type": "git",
     "url": "https://github.com/soysouvanh/lightx-js.git"
   },
-  "keywords": [],
+  "keywords": [
+    "daox",
+    "orm",
+    "bare-metal",
+    "nodejs",
+    "typescript",
+    "performance",
+    "aot",
+    "database",
+    "sql"
+  ],
   "license": "ISC",
   "author": "",
   "type": "module",
