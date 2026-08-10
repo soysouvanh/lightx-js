@@ -1,0 +1,17 @@
+{
+  "name": "__NAME__",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "tsx --test tests/**/*.test.ts"
+  },
+  "dependencies": {
+    "@soysouvanh/lightx": "latest",
+    "@soysouvanh/tmplx": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}

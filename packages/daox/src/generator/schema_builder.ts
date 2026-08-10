@@ -95,8 +95,9 @@ export function weaveSchemaOverrides(
   outDir: string,
   schema: DatabaseSchema
 ): void {
-  const baseDir = path.resolve(outDir, 'schema');
-  const overrideDir = path.resolve(outDir, '../dao_overrides/schema');
+  const outDirRelative = path.relative(path.join(process.cwd(), 'src', 'dao'), outDir);
+  const baseDir = path.join(process.cwd(), 'src', 'schema', outDirRelative);
+  const overrideDir = path.join(process.cwd(), 'src', 'overrides', outDirRelative, 'schema');
 
   for (const table of schema.tables) {
     const safeTable = toSafeTsIdentifier(table.name, 'table');
@@ -119,10 +120,6 @@ export function weaveSchemaOverrides(
         throw err;
       }
     }
-
-    // _table.ts Baseline
-    const defaultTableContent = `export default {\n  database: "default"\n};\n`;
-    fs.writeFileSync(path.join(baseTableDir, '_table.ts'), defaultTableContent);
 
     // O(1) Acceleration pre-computations for absolute performance (Bare Metal SOTA)
     const pkSet = new Set(table.primaryKeys);
@@ -158,44 +155,45 @@ export function weaveSchemaOverrides(
         `  business_rules: [],\n` +
         `  enum_values: { value: [] },\n` +
         `  format: {\n` +
-        `    message: "schema.format.message",\n` +
-        `    value: ""\n` +
+        `    value: "",\n` +
+        `    message: "schema.format.message"\n` +
         `  },\n` +
         `  has_default: { value: ${col.hasDefault} },\n` +
         `  is_auto_increment: { value: ${col.isAutoIncrement} },\n` +
         `  is_generated: { value: false },\n` +
         `  is_index: { value: ${isIndex} },\n` +
         `  is_optional: {\n` +
-        `    message: "schema.is_optional.message",\n` +
-        `    value: ${col.isNullable}\n` +
+        `    value: ${col.isNullable},\n` +
+        `    message: "schema.is_optional.message"\n` +
         `  },\n` +
         `  is_primary_key: { value: ${isPrimaryKey} },\n` +
         `  is_unique: { value: ${isUnique} },\n` +
         `  max_length: {\n` +
-        `    message: "schema.max_length.message|${col.maxLength}",\n` +
-        `    value: ${col.maxLength}\n` +
+        `    value: ${col.maxLength},\n` +
+        `    message: "schema.max_length.message|${col.maxLength}"\n` +
         `  },\n` +
         `  max_value: {\n` +
-        `    message: "schema.max_value.message|${col.maxValue}",\n` +
-        `    value: ${col.maxValue}\n` +
+        `    value: ${col.maxValue},\n` +
+        `    message: "schema.max_value.message|${col.maxValue}"\n` +
         `  },\n` +
         `  min_length: {\n` +
-        `    message: "schema.min_length.message|${col.minLength}",\n` +
-        `    value: ${col.minLength}\n` +
+        `    value: ${col.minLength},\n` +
+        `    message: "schema.min_length.message|${col.minLength}"\n` +
         `  },\n` +
         `  min_value: {\n` +
-        `    message: "schema.min_value.message|${col.minValue}",\n` +
-        `    value: ${col.minValue}\n` +
+        `    value: ${col.minValue},\n` +
+        `    message: "schema.min_value.message|${col.minValue}"\n` +
         `  },\n` +
         `  type: {\n` +
-        `    message: "schema.type.message",\n` +
-        `    value: "${col.typeLocal}"\n` +
+        `    value: "${col.typeLocal}",\n` +
+        `    message: "schema.type.message"\n` +
         `  }\n` +
         `};\n`;
       fs.writeFileSync(baseColTsPath, defaultColContent);
 
       // Mutate AST dynamically if the developer provided an override in dao_overrides/schema
       if (existingOverrides.has(colTsFileName)) {
+        existingOverrides.delete(colTsFileName);
         try {
           const parsed = parseTsOverride(overrideColTsPath);
           
@@ -264,5 +262,44 @@ export function weaveSchemaOverrides(
         }
       }
     }
+
+    // Process remaining "Virtual" or "Temporary" columns from overrides
+    // that don't exist physically in the DB schema
+    for (const virtualCol of existingOverrides) {
+      if (!virtualCol.endsWith(".ts")) continue;
+      const virtualColTsPath = path.join(overrideTableDir, virtualCol);
+      const destColTsPath = path.join(baseTableDir, virtualCol);
+      fs.copyFileSync(virtualColTsPath, destColTsPath);
+    }
+  }
+
+  // Phase 2: Process completely "Virtual" tables (e.g. payment/token.ts) 
+  // that don't match any physical database table at all
+  const physicalTables = new Set(schema.tables.map(t => toSafeTsIdentifier(t.name, 'table')));
+  try {
+    const overrideDirs = fs.readdirSync(overrideDir);
+    for (const virtualTable of overrideDirs) {
+      if (physicalTables.has(virtualTable)) continue; // Already processed
+      
+      const virtualTableDir = path.join(overrideDir, virtualTable);
+      const stat = fs.statSync(virtualTableDir);
+      if (!stat.isDirectory()) continue;
+
+      const baseTableDir = path.join(baseDir, virtualTable);
+      fs.mkdirSync(baseTableDir, { recursive: true });
+
+      const files = fs.readdirSync(virtualTableDir);
+      let copied = 0;
+      for (const file of files) {
+        if (!file.endsWith('.ts')) continue;
+        fs.copyFileSync(path.join(virtualTableDir, file), path.join(baseTableDir, file));
+        copied++;
+      }
+      if (copied > 0) {
+        console.log('  -> Virtual Table Override merged cleanly: ' + virtualTable);
+      }
+    }
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err;
   }
 }

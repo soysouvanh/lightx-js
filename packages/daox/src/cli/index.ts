@@ -96,7 +96,8 @@ async function main(): Promise<void> {
     }
     
     // Nuke the generated base schema reference folder to keep it perfectly synced with DB
-    const baseSchemaDir = path.join(finalOutDir, 'schema');
+    const outDirRelative = path.relative(path.join(process.cwd(), 'src', 'dao'), finalOutDir);
+    const baseSchemaDir = path.join(process.cwd(), 'src', 'schema', outDirRelative);
     if (fs.existsSync(baseSchemaDir)) {
       fs.rmSync(baseSchemaDir, { recursive: true, force: true });
     }
@@ -145,7 +146,7 @@ async function main(): Promise<void> {
     
     
     // Apply AOT Weaver for developer overrides
-    tableContent = weaveOverride(safeTable, entity, tableContent);
+    tableContent = weaveOverride(safeTable, entity, tableContent, finalOutDir);
     
     const tableFilePath = path.join(finalOutDir, safeTable + '.dao.ts');
     fs.writeFileSync(tableFilePath, tableContent);

@@ -42,10 +42,13 @@ export function buildTableInterfaces(table: TableSchema): string {
     insertType += ` & Partial<Pick<${entity}Row, ${defaultCols}>>`;
   }
 
+  let colsConstant = `export type ${entity}Cols = \`${table.name}.\${keyof ${entity}Row & string}\`;\n`;
+
   return `
 export interface ${entity}Row {
 ${rowProps}}
 
+${colsConstant}
 export type ${entity}Insert = ${insertType};
 export type ${entity}Patch = Partial<${entity}Insert>;
 `.trim() + '\n';

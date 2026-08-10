@@ -133,7 +133,7 @@ describe('TS Code Generator (AOT)', () => {
             const path = await import('node:path');
             const { weaveOverride } = await import('../../src/generator/weaver.js');
             
-            const overridesDir = path.join(process.cwd(), 'src', 'dao_overrides');
+            const overridesDir = path.join(process.cwd(), 'src', 'overrides', 'main', 'dao');
             if (!fs.existsSync(overridesDir)) fs.mkdirSync(overridesDir, { recursive: true });
             
             const generatedAst = `export class Mock_weaver_testDao {
@@ -153,7 +153,7 @@ describe('TS Code Generator (AOT)', () => {
             fs.writeFileSync(testPath, validOverride);
             
             try {
-                const woven = weaveOverride('mock_weaver_test', 'Mock_weaver_test', generatedAst);
+                const woven = weaveOverride('mock_weaver_test', 'Mock_weaver_test', generatedAst, path.join(process.cwd(), 'src', 'dao', 'main'));
                 expect(woven).toContain('return 42;');
                 expect(woven).toContain('customMethod(a: string)');
                 expect(woven).not.toContain('return 0;');
@@ -167,7 +167,7 @@ describe('TS Code Generator (AOT)', () => {
             const path = await import('node:path');
             const { weaveOverride } = await import('../../src/generator/weaver.js');
             
-            const overridesDir = path.join(process.cwd(), 'src', 'dao_overrides');
+            const overridesDir = path.join(process.cwd(), 'src', 'overrides', 'main', 'dao');
             if (!fs.existsSync(overridesDir)) fs.mkdirSync(overridesDir, { recursive: true });
             
             const generatedAst = `export class Mock_weaver_failDao {
@@ -182,7 +182,7 @@ describe('TS Code Generator (AOT)', () => {
             fs.writeFileSync(testPath, invalidOverride);
             
             try {
-                expect(() => weaveOverride('mock_weaver_fail', 'Mock_weaver_fail', generatedAst))
+                expect(() => weaveOverride('mock_weaver_fail', 'Mock_weaver_fail', generatedAst, path.join(process.cwd(), 'src', 'dao', 'main')))
                    .toThrow(/Signature mismatch for method 'count'/);
             } finally {
                 fs.unlinkSync(testPath);
@@ -249,6 +249,136 @@ describe('TS Code Generator (AOT)', () => {
             // Inside valid_table, __proto__ and constructor must be omitted
             expect(result).not.toContain('name: "__proto__"');
             expect(result).not.toContain('name: "constructor"');
+        });
+    });
+
+    describe('Schema Overrides Weaver (AOT Schema Injection)', () => {
+        it('should successfully mutate AST schema boundaries based on developer overrides', async () => {
+            const fs = await import('node:fs');
+            const path = await import('node:path');
+            const { weaveSchemaOverrides } = await import('../../src/generator/schema_builder.js');
+            
+            const schemaDir = path.join(process.cwd(), 'src', 'overrides', 'main', 'schema', 'mock_schema_table');
+            if (!fs.existsSync(schemaDir)) fs.mkdirSync(schemaDir, { recursive: true });
+            
+            const validOverride = `export default {
+                max_length: { value: 50 },
+                format: { value: "^[A-Z]+$" },
+                is_index: { value: true },
+                is_unique: { value: true }
+            }`;
+            
+            const testPath = path.join(schemaDir, 'mock_col.ts');
+            fs.writeFileSync(testPath, validOverride);
+            
+            const mockSchema: any = {
+                tables: [
+                    {
+                        name: 'mock_schema_table',
+                        columns: [
+                            { name: 'mock_col', sqlType: 'VARCHAR', typeLocal: 'string', isNullable: false, hasDefault: false, isAutoIncrement: false, maxLength: 255 }
+                        ],
+                        primaryKeys: [],
+                        indexes: []
+                    }
+                ]
+            };
+            
+            try {
+                // Execute Weaver. outDir resolves to src/dao/main
+                weaveSchemaOverrides(path.join(process.cwd(), 'src', 'dao', 'main'), mockSchema);
+                
+                // Assert that the original schema reference was mutated
+                const mutatedCol = mockSchema.tables[0].columns[0];
+                expect(mutatedCol.maxLength).toBe(50); // Partially overridden
+                expect(mutatedCol.format).toBe('^[A-Z]+$'); // Extension
+                // Also check if index was added for is_unique
+                expect(mockSchema.tables[0].indexes.length).toBe(1);
+                expect(mockSchema.tables[0].indexes[0].isUnique).toBe(true);
+            } finally {
+                fs.unlinkSync(testPath);
+                // Also cleanup the base generator outputs for tests
+                fs.rmSync(path.join(process.cwd(), 'src', 'schema', 'main'), { recursive: true, force: true });
+            }
+        });
+
+        it('should successfully copy orphan virtual columns from overrides into the final unified schema directory', async () => {
+            const fs = await import('node:fs');
+            const path = await import('node:path');
+            const { weaveSchemaOverrides } = await import('../../src/generator/schema_builder.js');
+            
+            const schemaDir = path.join(process.cwd(), 'src', 'overrides', 'main', 'schema', 'mock_schema_table');
+            if (!fs.existsSync(schemaDir)) fs.mkdirSync(schemaDir, { recursive: true });
+            
+            const virtualOverride = `export default { is_virtual: { value: true } }`;
+            const testPath = path.join(schemaDir, 'virtual_col.ts');
+            fs.writeFileSync(testPath, virtualOverride);
+            
+            const mockSchema: any = {
+                tables: [
+                    {
+                        name: 'mock_schema_table',
+                        columns: [
+                            { name: 'mock_col', sqlType: 'VARCHAR', typeLocal: 'string', isNullable: false, hasDefault: false, isAutoIncrement: false, maxLength: 255 }
+                        ],
+                        primaryKeys: [],
+                        indexes: []
+                    }
+                ]
+            };
+            
+            try {
+                weaveSchemaOverrides(path.join(process.cwd(), 'src', 'dao', 'main'), mockSchema);
+                
+                const copiedPath = path.join(process.cwd(), 'src', 'schema', 'main', 'mock_schema_table', 'virtual_col.ts');
+                expect(fs.existsSync(copiedPath)).toBe(true);
+                const fileContent = fs.readFileSync(copiedPath, 'utf8');
+                expect(fileContent).toContain('is_virtual');
+                
+            } finally {
+                fs.unlinkSync(testPath);
+                fs.rmSync(path.join(process.cwd(), 'src', 'schema', 'main'), { recursive: true, force: true });
+            }
+        });
+
+        it('should successfully copy entirely virtual tables from overrides into the final unified schema directory', async () => {
+            const fs = await import('node:fs');
+            const path = await import('node:path');
+            const { weaveSchemaOverrides } = await import('../../src/generator/schema_builder.js');
+            
+            const schemaDir = path.join(process.cwd(), 'src', 'overrides', 'main', 'schema', 'virtual_entity');
+            if (!fs.existsSync(schemaDir)) fs.mkdirSync(schemaDir, { recursive: true });
+            
+            const virtualOverride = `export default { is_entirely_virtual: { value: true } }`;
+            const testPath = path.join(schemaDir, 'orphan_col.ts');
+            fs.writeFileSync(testPath, virtualOverride);
+            
+            const mockSchema: any = {
+                tables: [
+                    {
+                        name: 'real_table',
+                        columns: [
+                            { name: 'mock_col', sqlType: 'VARCHAR', typeLocal: 'string', isNullable: false, hasDefault: false, isAutoIncrement: false, maxLength: 255 }
+                        ],
+                        primaryKeys: [],
+                        indexes: []
+                    }
+                ]
+            };
+            
+            try {
+                weaveSchemaOverrides(path.join(process.cwd(), 'src', 'dao', 'main'), mockSchema);
+                
+                const copiedPath = path.join(process.cwd(), 'src', 'schema', 'main', 'virtual_entity', 'orphan_col.ts');
+                expect(fs.existsSync(copiedPath)).toBe(true);
+                const fileContent = fs.readFileSync(copiedPath, 'utf8');
+                expect(fileContent).toContain('is_entirely_virtual');
+                
+            } finally {
+                fs.unlinkSync(testPath);
+                fs.rmSync(schemaDir, { recursive: true, force: true });
+                fs.rmSync(path.join(process.cwd(), 'src', 'schema', 'main'), { recursive: true, force: true });
+            }
         });
     });
 });

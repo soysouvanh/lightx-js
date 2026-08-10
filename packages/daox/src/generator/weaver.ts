@@ -5,9 +5,11 @@ import path from 'node:path';
 export function weaveOverride(
   safeTable: string,
   entity: string,
-  generatedContent: string
+  generatedContent: string,
+  outDir: string
 ): string {
-  const overridePath = path.join(process.cwd(), 'src', 'dao_overrides', `${safeTable}.dao.ts`);
+  const outDirRelative = path.relative(path.join(process.cwd(), 'src', 'dao'), outDir);
+  const overridePath = path.join(process.cwd(), 'src', 'overrides', outDirRelative, 'dao', `${safeTable}.dao.ts`);
   
   if (!fs.existsSync(overridePath)) {
     return generatedContent;

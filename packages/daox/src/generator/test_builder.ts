@@ -13,7 +13,7 @@ export function buildDaoTests(dialect: string, table: TableSchema, importPath: s
   code += `import { ${entity}Dao } from '${importPath}/${safeTable}.dao.js';\n`;
   code += `import type { GenericExecutor } from '@soysouvanh/daox';\n\n`;
   code += `describe('${entity}Dao', () => {\n`;
-  code += `  let mockExecutor: any;\n\n`;
+  code += `  let mockExecutor: jest.Mocked<GenericExecutor>;\n\n`;
   code += `  beforeEach(() => {\n`;
   code += `    mockExecutor = {\n`;
   code += `      query: jest.fn().mockResolvedValue([]),\n`;
@@ -24,24 +24,24 @@ export function buildDaoTests(dialect: string, table: TableSchema, importPath: s
   code += `  describe('CRUD Methods', () => {\n`;
   code += `    it('should execute insert appropriately', async () => {\n`;
   code += `      mockExecutor.query.mockResolvedValueOnce([{}]);\n`;
-  code += `      await ${entity}Dao.insert(mockExecutor, { "${dummyCol}": 1 } as any);\n`;
+  code += `      await ${entity}Dao.insert(mockExecutor, { "${dummyCol}": 1 } as never);\n`;
   code += `      expect(mockExecutor.query).toHaveBeenCalled();\n`;
   code += `    });\n\n`;
 
   if (pkName) {
     code += `    it('should execute findBy${PkTitle}', async () => {\n`;
     code += `      mockExecutor.query.mockResolvedValueOnce([{}]);\n`;
-    code += `      await ${entity}Dao.findBy${PkTitle}(mockExecutor, 1 as any);\n`;
+    code += `      await ${entity}Dao.findBy${PkTitle}(mockExecutor, 1 as never);\n`;
     code += `      expect(mockExecutor.query).toHaveBeenCalled();\n`;
     code += `    });\n\n`;
 
     code += `    it('should execute updateBy${PkTitle}', async () => {\n`;
-    code += `      await ${entity}Dao.updateBy${PkTitle}(mockExecutor, 1 as any, { "${dummyCol}": 1 } as any);\n`;
+    code += `      await ${entity}Dao.updateBy${PkTitle}(mockExecutor, 1 as never, { "${dummyCol}": 1 } as never);\n`;
     code += `      expect(mockExecutor.query).toHaveBeenCalled();\n`;
     code += `    });\n\n`;
 
     code += `    it('should execute deleteBy${PkTitle}', async () => {\n`;
-    code += `      await ${entity}Dao.deleteBy${PkTitle}(mockExecutor, 1 as any);\n`;
+    code += `      await ${entity}Dao.deleteBy${PkTitle}(mockExecutor, 1 as never);\n`;
     code += `      expect(mockExecutor.query).toHaveBeenCalled();\n`;
     code += `    });\n`;
   }
@@ -52,7 +52,7 @@ export function buildDaoTests(dialect: string, table: TableSchema, importPath: s
 
   for (const idx of validIndexes) {
     const colsTitle = idx.columns.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join('And');
-    const colsArgs = idx.columns.map((_, i) => `${i + 1} as any`).join(', ');
+    const colsArgs = idx.columns.map((_, i) => `${i + 1} as never`).join(', ');
 
     if (idx.isUnique) {
       code += `\n    it('should execute findBy${colsTitle}', async () => {\n`;
@@ -86,7 +86,7 @@ export function buildDaoTests(dialect: string, table: TableSchema, importPath: s
   }
 
   code += `    it('should execute insertBatch', async () => {\n`;
-  code += `      await ${entity}Dao.insertBatch(mockExecutor, [{ "${dummyCol}": 1 } as any]);\n`;
+  code += `      await ${entity}Dao.insertBatch(mockExecutor, [{ "${dummyCol}": 1 } as never]);\n`;
   code += `      expect(mockExecutor.query).toHaveBeenCalled();\n`;
   code += `    });\n`;
   code += `  });\n`;

@@ -1,9 +1,24 @@
 {
   "name": "@soysouvanh/lightx",
   "version": "0.1.0",
-  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "lightx": "./bin/lightx.js"
+  },
+  "scripts": {
+    "test": "npx tsx --test tests/unit/**/*.test.ts"
+  },
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.js"
+  },
   "dependencies": {
     "@soysouvanh/daox": "*",
     "@soysouvanh/tmplx": "*"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "tsx": "latest",
+    "typescript": "latest"
   }
 }
